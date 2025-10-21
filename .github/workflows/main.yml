@@ -21,14 +21,9 @@ jobs:
           restore-keys: |
             Library-
 
-      - name: Install Dependencies
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
 
-      - run: cd apps/web ; npm install
-        name: Install dependencies
-
+      - name: Install dependencies
+      
       - run: cd apps/web ; npm run build
         name: Build
 
