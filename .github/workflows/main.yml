@@ -1,10 +1,10 @@
-﻿name: Actions 😎
+﻿name: Actions
 
 on: [push, pull_request]
 
 jobs:
   build:
-    name: Build my project ✨
+    name: Build my project
     runs-on: ubuntu-latest
     steps:
       # Checkout
@@ -20,6 +20,17 @@ jobs:
           key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-
+
+      - name: Install Dependencies
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - run: cd apps/web ; npm install
+        name: Install dependencies
+
+      - run: cd apps/web ; npm run build
+        name: Build
 
       # Build
       - name: Build project
@@ -40,8 +51,22 @@ jobs:
           path: build
 
       # Deploy    
-      - name: Deploy 🚀
+      - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build/WebGL/WebGL # The folder the action should deploy.
           single-commit: true    
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 23.0.0
+          extra_plugins: |
+            @semantic-release/changelog@6.0.2
+            @semantic-release/git@10.0.1
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/github@8.0.7
+            @semantic-release/release-notes-generator@10.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
