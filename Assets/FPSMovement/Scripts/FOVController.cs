@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem.iOS;
 
 public class FOVController : MonoBehaviour
 {
