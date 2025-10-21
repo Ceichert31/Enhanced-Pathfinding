@@ -4,15 +4,12 @@ using UnityEngine;
 
 public class AStarPathfinding : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    private Dictionary<WeightedPosition, float> costSoFar;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+}
+
+public struct WeightedPosition
+{
+    public float Weight;
+    public Vector3 Position;
 }
