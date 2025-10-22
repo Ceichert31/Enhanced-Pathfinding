@@ -5,6 +5,7 @@ using UnityEngine;
 public class AStarPathfinding : MonoBehaviour
 {
     private Dictionary<WeightedPosition, float> costSoFar;
+    //private PriorityQueue<string, int> taskQueue;
 
 }
 
