@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Utils;
 
 public class AStarPathfinding : MonoBehaviour, IPathfinder
@@ -11,6 +12,12 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     private HashSet<WeightedPosition> frontierSet;
 
     private Dictionary<WeightedPosition, bool> objectGrid;
+
+    private NavmeshGeneration navmesh;
+    private void Start()
+    {
+        navmesh = GetComponent<NavmeshGeneration>();
+    }
 
     public List<Vector3> GetPath(Vector3 startPos, Vector3 target)
     {
@@ -37,6 +44,14 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 endPoint = currentPoint;
                 break;
             }
+
+            var neighbors = GetVisitableNeighbors(currentPoint);
+            if (neighbors.Count == 0)
+            {
+                continue;
+            }
+
+
         }
 
         //If we find an end point
@@ -48,13 +63,76 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         return null;
     }
 
-  /*  private List<WeightedPosition> GetVisitableNeighbors(WeightedPosition pos)
+    private List<WeightedPosition> GetVisitableNeighbors(WeightedPosition pos)
     {
         List<WeightedPosition> neighbors = new();
 
-        WeightedPosition northPos = new(1.0f, new Vector3(pos.Position.x, pos.Position.y + 1, pos.Position.z));
-        WeightedPosition eastPos = new(1.0f, new Vector3(pos.Position.x - 1, pos.Position.y, pos.Position.z));
-    }*/
+        Vector3 northPos = new(pos.Position.x+1, navmesh.NavmeshHeight, pos.Position.z);
+        Vector3 eastPos = new(pos.Position.x-1, navmesh.NavmeshHeight, pos.Position.z);
+        Vector3 southPos = new(pos.Position.x-1, navmesh.NavmeshHeight, pos.Position.z+1);
+        Vector3 westPos = new(pos.Position.x-1, navmesh.NavmeshHeight, pos.Position.z-1);
+
+        var position = ValidatePosition(northPos);
+        if (position != null)
+        {
+            neighbors.Add(position);
+        }
+        position = ValidatePosition(eastPos);
+        if (position != null)
+        {
+            neighbors.Add(position);
+        }
+        position = ValidatePosition(southPos);
+        if (position != null)
+        {
+            neighbors.Add(position);
+        }
+        position = ValidatePosition(westPos);
+        if (position != null)
+        {
+            neighbors.Add(position);
+        }
+
+        return neighbors;
+    }
+    /// <summary>
+    /// Validates that a neighbor meets certain criteria 
+    /// </summary>
+    /// <param name="neighbor"></param>
+    /// <returns>A weighted position if valid, otherwise null</returns>
+    private WeightedPosition ValidatePosition(Vector3 neighbor)
+    {
+        //Check that position isn't obstructed(navmesh)
+        //Check that position isn't visited
+        //Check that position isn't in frontier set
+        //Check that position is in bounds
+
+        if (navmesh.navMeshGrid.TryGetValue(neighbor, out WeightedPosition weightedPos))
+        {
+            if (weightedPos.Weight < 0)
+                return null; 
+
+            if (weightedPos.IsVisited)
+                return null;
+
+            if (frontierSet.Contains(weightedPos))
+                return null;
+
+            if (!IsInBounds(weightedPos.Position))
+                return null;
+
+            return weightedPos;
+        }
+        return null;
+    }
+
+    private bool IsInBounds(Vector3 pos)
+    {
+        if (pos.x > navmesh.MinimumBoundary.x && pos.y > navmesh.MinimumBoundary.x
+            && pos.x < navmesh.MaximumBoundary.x && pos.y < navmesh.MaximumBoundary.y)
+            return true;
+        return false;
+    }
 }
 
 public class WeightedPosition

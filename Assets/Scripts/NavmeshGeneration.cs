@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteAlways]
 public class NavmeshGeneration : MonoBehaviour
 {
     public Dictionary<Vector3, WeightedPosition> navMeshGrid;
@@ -13,18 +14,31 @@ public class NavmeshGeneration : MonoBehaviour
     [SerializeField]
     private LayerMask obstacleLayer;
 
-    const float NAVMESH_HEIGHT = 100.0f;
+    private const float NAVMESH_HEIGHT = 100.0f;
 
-    private void Awake()
+    public float NavmeshHeight { get { return NavmeshHeight; } }
+    public Vector2 MinimumBoundary => minBound;
+    public Vector2 MaximumBoundary => maxBound;
+
+    [ContextMenu("Bake Navmesh")]
+    public void BakeNavmesh()
     {
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
         {
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
             {
-                //Check for obstacle layer
-                if (Physics.Raycast(new Vector3(i, NAVMESH_HEIGHT, j), Vector3.down, NAVMESH_HEIGHT, obstacleLayer))
-                {
+                Vector3 currentPosition = new(i, NAVMESH_HEIGHT, j);
 
+                //Check for obstacle layer
+                if (Physics.Raycast(currentPosition, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, obstacleLayer))
+                {
+                    //Add a negative weight for an impassible object
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(-1, currentPosition));
+                }
+                else
+                {
+                    //Set cost as the height of the point of contact
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(hitInfo.point.y, currentPosition));
                 }
             }
         }
