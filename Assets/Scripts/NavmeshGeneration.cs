@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteAlways]
 public class NavmeshGeneration : MonoBehaviour
 {
     public Dictionary<Vector3, WeightedPosition> navMeshGrid = new();
@@ -19,9 +18,7 @@ public class NavmeshGeneration : MonoBehaviour
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
-
-    [ContextMenu("Bake Navmesh")]
-    public void BakeNavmesh()
+    public void Awake()
     {
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
         {
@@ -37,8 +34,13 @@ public class NavmeshGeneration : MonoBehaviour
                 }
                 else
                 {
+                    float weight = hitInfo.point.y;
+
+                    if (weight <= 0)
+                        weight = 1;
+
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(hitInfo.point.y, currentPosition));
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(weight, currentPosition));
                 }
             }
         }

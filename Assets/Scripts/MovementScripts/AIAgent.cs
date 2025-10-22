@@ -33,7 +33,7 @@ public class AIAgent : MonoBehaviour
     private void Update()
     {
         //Get path to target
-        var path = pathfindingAlgorithm.GetPath(transform.position, target.position);
+        var path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
 
         if (path == null) return;
 
@@ -48,6 +48,15 @@ public class AIAgent : MonoBehaviour
         }
 
         transform.position = Vector3.MoveTowards(transform.position, path[0], agentSpeed * Time.deltaTime);
+    }
+
+    private Vector3 RoundVector(Vector3 vector)
+    {
+        return new Vector3(
+            Mathf.RoundToInt(vector.x),
+            Mathf.RoundToInt(vector.y),
+            Mathf.RoundToInt(vector.z)
+            );
     }
 
 }
