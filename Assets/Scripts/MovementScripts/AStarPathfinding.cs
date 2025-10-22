@@ -6,14 +6,14 @@ using Utils;
 
 public class AStarPathfinding : MonoBehaviour, IPathfinder
 {
-    private Dictionary<WeightedPosition, float> costSoFar;
-    private Dictionary<WeightedPosition, WeightedPosition> cameFrom;
-    private PriorityQueue<WeightedPosition, float> frontier;
-    private HashSet<WeightedPosition> frontierSet;
-
-    private Dictionary<WeightedPosition, bool> objectGrid;
+    private Dictionary<WeightedPosition, float> costSoFar = new();
+    private Dictionary<WeightedPosition, WeightedPosition> cameFrom = new();
+    private PriorityQueue<WeightedPosition, float> frontier = new();
+    private HashSet<WeightedPosition> frontierSet = new();
 
     private NavmeshGeneration navmesh;
+
+    private float currentHeuristic;
     private void Start()
     {
         navmesh = GetComponent<NavmeshGeneration>();
@@ -21,6 +21,9 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
     public List<Vector3> GetPath(Vector3 startPos, Vector3 target)
     {
+        //Cache the heuristic
+        currentHeuristic = Heuristic(startPos, target);
+
         //Initialize start position
         WeightedPosition startPosition = new(0.0f, startPos)
         {
@@ -51,13 +54,33 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 continue;
             }
 
+            foreach (var neighbor in neighbors) 
+            {
+                //Calculate new cost of travel
+                float newCost = costSoFar[currentPoint] + neighbor.Weight;
 
+                //Check if the neighbor exists already in the frontier and if it does, check its old cost
+                if (!frontierSet.Contains(neighbor) || costSoFar[neighbor] > newCost)
+                {
+                    costSoFar[neighbor] = newCost;
+
+                    float priority = newCost + currentHeuristic;
+
+                    //Update came from dictionary
+                    cameFrom[neighbor] = currentPoint;
+
+                    //Add neighbor to frontier
+                    frontier.Enqueue(neighbor, priority);
+                    frontierSet.Add(neighbor);
+                }
+
+            }
         }
 
         //If we find an end point
         if (endPoint != null)
         {
-
+            Debug.Log("Found path!");
         }
 
         return null;
@@ -132,6 +155,11 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             && pos.x < navmesh.MaximumBoundary.x && pos.y < navmesh.MaximumBoundary.y)
             return true;
         return false;
+    }
+
+    public float Heuristic(Vector3 start, Vector3 end)
+    {
+        return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.z - end.z);
     }
 }
 

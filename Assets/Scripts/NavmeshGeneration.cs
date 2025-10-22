@@ -5,7 +5,7 @@ using UnityEngine;
 [ExecuteAlways]
 public class NavmeshGeneration : MonoBehaviour
 {
-    public Dictionary<Vector3, WeightedPosition> navMeshGrid;
+    public Dictionary<Vector3, WeightedPosition> navMeshGrid = new();
 
     [SerializeField]
     private Vector2 minBound;
@@ -16,7 +16,7 @@ public class NavmeshGeneration : MonoBehaviour
 
     private const float NAVMESH_HEIGHT = 100.0f;
 
-    public float NavmeshHeight { get { return NavmeshHeight; } }
+    public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
 

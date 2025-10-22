@@ -8,22 +8,22 @@ public class AIAgent : MonoBehaviour
     //Handle target and agent related stats:
     //like speed, and whatnot 
 
-    [SerializeField]
-    private IPathfinder pathfindingAlgorithm;
+    [Header("Agent Settings")]
 
     [SerializeField]
     private Transform target;
 
-    [Header("Agent Settings")]
-
     [SerializeField]
     private float agentSpeed = 1f;
 
-    private void Start()
-    {
-        pathfindingAlgorithm = GetComponent<IPathfinder>();
+    [SerializeField]
+    private bool enableDebug;
 
-        if (pathfindingAlgorithm == null)
+    private IPathfinder pathfindingAlgorithm;
+
+    private void Awake()
+    {
+        if (!transform.TryGetComponent(out pathfindingAlgorithm))
         {
             throw new NullReferenceException("Please add a pathfinding algorithm to the AI Agent!");
         }
@@ -36,6 +36,16 @@ public class AIAgent : MonoBehaviour
         var path = pathfindingAlgorithm.GetPath(transform.position, target.position);
 
         if (path == null) return;
+
+        if (enableDebug)
+        {
+            Vector3 previousPosition = path[0];
+            foreach (Vector3 position in path)
+            {
+               Debug.DrawLine(previousPosition, position, Color.red);
+               previousPosition = position;
+            }
+        }
 
         transform.position = Vector3.MoveTowards(transform.position, path[0], agentSpeed * Time.deltaTime);
     }
