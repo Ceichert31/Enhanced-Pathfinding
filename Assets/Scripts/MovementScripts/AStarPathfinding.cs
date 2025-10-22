@@ -21,9 +21,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         HashSet<WeightedPosition> frontierSet = new();
         Dictionary<WeightedPosition, bool> visited = new();
 
-        //Cache the heuristic
-        float currentHeuristic = Heuristic(startPos, target);
-
         Vector3 startPosition = new(startPos.x, navmesh.NavmeshHeight, startPos.z);
         Vector3 endPosition = new(target.x, navmesh.NavmeshHeight, target.z);
 
@@ -65,7 +62,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                     neighbor.Weight = newCost;
                     costSoFar[neighbor] = newCost;
 
-                    float priority = newCost + currentHeuristic;
+                    float priority = newCost + Heuristic(startPos, target);
 
                     //Update came from dictionary
                     cameFrom[neighbor.Position] = currentPoint.Position;

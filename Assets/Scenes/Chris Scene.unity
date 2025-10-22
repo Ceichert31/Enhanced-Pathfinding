@@ -540,7 +540,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732563883}
-  agentSpeed: 3
+  agentSpeed: 4
   enableDebug: 0
 --- !u!114 &1578448127
 MonoBehaviour:
