@@ -12,6 +12,13 @@ public class NavmeshGeneration : MonoBehaviour
     private Vector2 maxBound;
     [SerializeField]
     private LayerMask obstacleLayer;
+    [SerializeField]
+    private bool enableDebug;
+
+    [SerializeField]
+    private int debugResolution = 5;
+    [SerializeField]
+    private float debugRadius = 0.5f;
 
     private const float NAVMESH_HEIGHT = 100.0f;
 
@@ -41,6 +48,28 @@ public class NavmeshGeneration : MonoBehaviour
 
                     //Set cost as the height of the point of contact
                     navMeshGrid.Add(currentPosition, new WeightedPosition(weight, currentPosition));
+                }
+            }
+        }
+    }
+    private void OnDrawGizmos()
+    {
+        if (enableDebug)
+        {
+            for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
+            {
+                for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
+                {
+                    if (navMeshGrid.TryGetValue(new Vector3(i, NavmeshHeight, j), out WeightedPosition position))
+                    {
+                        if (position.Weight < 0)
+                        {
+                            return;
+                        }
+                    }
+
+                    Gizmos.color = Color.blue;
+                    Gizmos.DrawSphere(new Vector3(i, 0, j), debugRadius);
                 }
             }
         }
