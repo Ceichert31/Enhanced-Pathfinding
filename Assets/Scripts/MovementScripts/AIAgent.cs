@@ -33,7 +33,7 @@ public class AIAgent : MonoBehaviour
     private void Update()
     {
         //Get path to target
-        var path = pathfindingAlgorithm.GetPath(target.position);
+        var path = pathfindingAlgorithm.GetPath(transform.position, target.position);
 
         if (path == null) return;
 
@@ -44,5 +44,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    List<Vector3> GetPath(Vector3 target);
+    List<Vector3> GetPath(Vector3 startPos, Vector3 target);
 }
