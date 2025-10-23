@@ -21,8 +21,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         HashSet<WeightedPosition> frontierSet = new();
         Dictionary<WeightedPosition, bool> visited = new();
 
-        Vector3 startPosition = new(startPos.x, navmesh.NavmeshHeight, startPos.z);
-        Vector3 endPosition = new(target.x, navmesh.NavmeshHeight, target.z);
+        Vector3 startPosition = new(startPos.x, 0, startPos.z);
+        Vector3 endPosition = new(target.x, 1, target.z);
 
         //Initialize start position
         WeightedPosition startWeight = new(0.0f, startPosition);

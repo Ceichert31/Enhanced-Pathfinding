@@ -15,6 +15,7 @@ public class NavmeshGeneration : MonoBehaviour
     [SerializeField]
     private bool enableDebug;
 
+    [Range(3f, 5f)]
     [SerializeField]
     private int debugResolution = 5;
     [SerializeField]
@@ -37,7 +38,7 @@ public class NavmeshGeneration : MonoBehaviour
                 if (Physics.Raycast(currentPosition, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, obstacleLayer))
                 {
                     //Add a negative weight for an impassible object
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(-1, currentPosition));
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(-1, new (currentPosition.x, hitInfo.point.y, currentPosition.z)));
                 }
                 else
                 {
@@ -47,7 +48,7 @@ public class NavmeshGeneration : MonoBehaviour
                         weight = 1;
 
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(weight, currentPosition));
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(weight, new(currentPosition.x, weight, currentPosition.z)));
                 }
             }
         }
@@ -64,7 +65,7 @@ public class NavmeshGeneration : MonoBehaviour
                     {
                         if (position.Weight < 0)
                         {
-                            return;
+                            continue;
                         }
                     }
 

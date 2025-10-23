@@ -49,7 +49,7 @@ public class AIAgent : MonoBehaviour
         }
 
         Vector3 moveTo = new Vector3(path[0].x, 1.25f, path[0].z);
-        transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, path[0], agentSpeed * Time.deltaTime);
     }
 
     private Vector3 RoundVector(Vector3 vector)
