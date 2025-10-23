@@ -38,17 +38,12 @@ public class NavmeshGeneration : MonoBehaviour
                 if (Physics.Raycast(currentPosition, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, obstacleLayer))
                 {
                     //Add a negative weight for an impassible object
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(-1, new (currentPosition.x, hitInfo.point.y, currentPosition.z)));
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(-1, currentPosition));
                 }
                 else
                 {
-                    float weight = hitInfo.point.y;
-
-                    if (weight <= 0)
-                        weight = 1;
-
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(weight, new(currentPosition.x, weight, currentPosition.z)));
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(1, currentPosition));
                 }
             }
         }

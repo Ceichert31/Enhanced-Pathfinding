@@ -480,6 +480,10 @@ PrefabInstance:
       propertyPath: m_BackGroundColor.r
       value: 0.3333333
       objectReference: {fileID: 0}
+    - target: {fileID: 7802647240829371144, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 127
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2487077017867768133, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
@@ -925,7 +929,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1578448124}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.25, z: 20}
+  m_LocalPosition: {x: 0, y: 1.25, z: 20.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

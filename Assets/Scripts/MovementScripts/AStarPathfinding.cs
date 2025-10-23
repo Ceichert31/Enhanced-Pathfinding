@@ -21,13 +21,13 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         HashSet<WeightedPosition> frontierSet = new();
         Dictionary<WeightedPosition, bool> visited = new();
 
-        Vector3 startPosition = new(startPos.x, 0, startPos.z);
-        Vector3 endPosition = new(target.x, 1, target.z);
+        Vector3 startPosition = new(startPos.x, navmesh.NavmeshHeight, startPos.z);
+        Vector3 endPosition = new(target.x, navmesh.NavmeshHeight, target.z);
 
         //Initialize start position
         WeightedPosition startWeight = new(0.0f, startPosition);
-        frontier.Enqueue(startWeight, startWeight.Weight);
-        costSoFar.Add(startWeight, startWeight.Weight);
+        frontier.Enqueue(startWeight, 0);
+        costSoFar.Add(startWeight, 0);
         frontierSet.Add(startWeight);
 
         WeightedPosition endPoint = null;
@@ -54,19 +54,17 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             foreach (var neighbor in neighbors) 
             {
                 //Calculate new cost of travel
-                float newCost = costSoFar[currentPoint] + neighbor.Weight;
+                float newCost = costSoFar[currentPoint] + 1;
 
                 //Check if the neighbor exists already in the frontier and if it does, check its old cost
                 if (!frontierSet.Contains(neighbor) || costSoFar[neighbor] > newCost)
                 {
-                    neighbor.Weight = newCost;
                     costSoFar[neighbor] = newCost;
 
-                    float priority = newCost + Heuristic(startPos, target);
+                    float priority = newCost + Heuristic(neighbor.Position, target);
 
                     //Update came from dictionary
                     cameFrom[neighbor.Position] = currentPoint.Position;
-
                     //Add neighbor to frontier
                     frontier.Enqueue(neighbor, priority);
                     frontierSet.Add(neighbor);
@@ -102,8 +100,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
         Vector3 northPos = new(pos.Position.x+1, navmesh.NavmeshHeight, pos.Position.z);
         Vector3 eastPos = new(pos.Position.x-1, navmesh.NavmeshHeight, pos.Position.z);
-        Vector3 southPos = new(pos.Position.x-1, navmesh.NavmeshHeight, pos.Position.z+1);
-        Vector3 westPos = new(pos.Position.x-1, navmesh.NavmeshHeight, pos.Position.z-1);
+        Vector3 southPos = new(pos.Position.x, navmesh.NavmeshHeight, pos.Position.z+1);
+        Vector3 westPos = new(pos.Position.x, navmesh.NavmeshHeight, pos.Position.z-1);
 
         var position = ValidatePosition(northPos, ref visited);
         if (position != null)
