@@ -416,6 +416,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FPSMovement
       objectReference: {fileID: 0}
+    - target: {fileID: 3248259657647873371, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
+      propertyPath: sprintSpeed
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 4184258596113817863, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -484,6 +488,10 @@ PrefabInstance:
       propertyPath: m_CullingMask.m_Bits
       value: 127
       objectReference: {fileID: 0}
+    - target: {fileID: 8939591259619301516, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
+      propertyPath: expandDevMenuEvent
+      value: 
+      objectReference: {fileID: 11400000, guid: cbed18d2ac478d645b4b26295b587847, type: 2}
     m_RemovedComponents:
     - {fileID: 2487077017867768133, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
