@@ -42,8 +42,14 @@ public class NavmeshGeneration : MonoBehaviour
                 }
                 else
                 {
+                    float weight = hitInfo.point.y;
+                    if (weight <= 0)
+                    {
+                        weight = 1;
+                    }
+
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(1, currentPosition));
+                    navMeshGrid.Add(currentPosition, new WeightedPosition(weight, currentPosition));
                 }
             }
         }
