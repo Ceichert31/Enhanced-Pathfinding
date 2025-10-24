@@ -956,9 +956,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minBound: {x: -50, y: -50}
   maxBound: {x: 50, y: 50}
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 8
+  obstacleLayer: 3
   enableDebug: 0
   debugResolution: 3
   debugRadius: 0.5

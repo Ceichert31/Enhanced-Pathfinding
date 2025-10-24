@@ -19,13 +19,10 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         Dictionary<Vector3, Vector3> cameFrom = new();
         PriorityQueue<WeightedPosition, float> frontier = new();
         HashSet<WeightedPosition> frontierSet = new();
-        Dictionary<WeightedPosition, bool> visited = new();
-
-        Vector3 startPosition = new(startPos.x, navmesh.NavmeshHeight, startPos.z);
-        Vector3 endPosition = new(target.x, navmesh.NavmeshHeight, target.z);
+        HashSet<Vector3> visited = new();
 
         //Initialize start position
-        WeightedPosition startWeight = new(0.0f, startPosition);
+        WeightedPosition startWeight = new(0.0f, startPos);
         frontier.Enqueue(startWeight, 0);
         costSoFar.Add(startWeight, 0);
         frontierSet.Add(startWeight);
@@ -36,10 +33,10 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         while (frontier.Count > 0)
         {
             var currentPoint = frontier.Dequeue();
-            visited.TryAdd(currentPoint, true);
+            visited.Add(currentPoint.Position);
 
             //If current point is end point
-            if (currentPoint.Position == endPosition)
+            if (currentPoint.Position == target)
             {
                 endPoint = currentPoint;
                 break;
@@ -54,7 +51,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             foreach (var neighbor in neighbors) 
             {
                 //Calculate new cost of travel
-                float newCost = costSoFar[currentPoint] + 1;
+                float newCost = costSoFar[currentPoint] + neighbor.Weight;
 
                 //Check if the neighbor exists already in the frontier and if it does, check its old cost
                 if (!frontierSet.Contains(neighbor) || costSoFar[neighbor] > newCost)
@@ -86,7 +83,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 return null;
             }
 
-            while (current != startPosition)
+            while (current != startPos)
             {
                 path.Add(current);
 
@@ -101,14 +98,14 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         return null;
     }
 
-    private List<WeightedPosition> GetVisitableNeighbors(WeightedPosition pos, ref Dictionary<WeightedPosition, bool> visited)
+    private List<WeightedPosition> GetVisitableNeighbors(WeightedPosition pos, ref HashSet<Vector3> visited)
     {
         List<WeightedPosition> neighbors = new();
 
-        Vector3 northPos = new(pos.Position.x+1, navmesh.NavmeshHeight, pos.Position.z);
-        Vector3 eastPos = new(pos.Position.x-1, navmesh.NavmeshHeight, pos.Position.z);
-        Vector3 southPos = new(pos.Position.x, navmesh.NavmeshHeight, pos.Position.z+1);
-        Vector3 westPos = new(pos.Position.x, navmesh.NavmeshHeight, pos.Position.z-1);
+        Vector2 northPos = new(pos.Position.x+1, pos.Position.z);
+        Vector2 eastPos = new(pos.Position.x-1, pos.Position.z);
+        Vector2 southPos = new(pos.Position.x, pos.Position.z+1);
+        Vector2 westPos = new(pos.Position.x, pos.Position.z-1);
 
         var position = ValidatePosition(northPos, ref visited);
         if (position != null)
@@ -138,25 +135,21 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     /// </summary>
     /// <param name="neighbor"></param>
     /// <returns>A weighted position if valid, otherwise null</returns>
-    private WeightedPosition ValidatePosition(Vector3 neighbor, ref Dictionary<WeightedPosition, bool> visited)
+    private WeightedPosition ValidatePosition(Vector3 neighbor, ref HashSet<Vector3> visited)
     {
-        //Check that position isn't obstructed(navmesh)
-        //Check that position isn't visited
-        //Check that position isn't in frontier set
-        //Check that position is in bounds
-
-        if (navmesh.navMeshGrid.TryGetValue(neighbor, out WeightedPosition weightedPos))
+        //Get navmesh data and check is the neighbor is valid
+        if (navmesh.navMeshGrid.TryGetValue(new Vector2(neighbor.x, neighbor.z), out TerrainData data))
         {
-            if (weightedPos.Weight < 0)
+            if (!data.IsWalkable)
                 return null;
 
-            if (visited.ContainsKey(weightedPos))
+            if (visited.Contains(data.Position))
                 return null;
 
-            if (!IsInBounds(weightedPos.Position))
+            if (!IsInBounds(data.Position))
                 return null;
 
-            return weightedPos;
+            return new WeightedPosition(data.MovementCost, data.Position);
         }
         return null;
     }

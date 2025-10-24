@@ -51,6 +51,7 @@ public class AIAgent : MonoBehaviour
             }
         }
 
+        //Raycast down and get point
         Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitInfo, GROUND_RAY_DIST);
 
         Vector3 moveTo = new Vector3(path[0].x, hitInfo.point.y + CAPSULE_OFFSET, path[0].z);

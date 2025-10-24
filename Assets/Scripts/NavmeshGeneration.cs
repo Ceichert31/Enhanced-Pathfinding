@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class NavmeshGeneration : MonoBehaviour
 {
-    public Dictionary<Vector3, WeightedPosition> navMeshGrid = new();
+    public Dictionary<Vector2, TerrainData> navMeshGrid = new();
 
     [SerializeField]
     private Vector2 minBound;
     [SerializeField]
     private Vector2 maxBound;
     [SerializeField]
-    private LayerMask obstacleLayer;
+    private int obstacleLayer;
     [SerializeField]
     private bool enableDebug;
 
@@ -32,24 +32,19 @@ public class NavmeshGeneration : MonoBehaviour
         {
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
             {
-                Vector3 currentPosition = new(i, NAVMESH_HEIGHT, j);
+                Vector2 key = new(i, j);
 
                 //Check for obstacle layer
-                if (Physics.Raycast(currentPosition, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, obstacleLayer))
+                if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT + 3))
                 {
-                    //Add a negative weight for an impassible object
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(-1, currentPosition));
-                }
-                else
-                {
-                    float weight = hitInfo.point.y;
-                    if (weight <= 0)
+                    if (hitInfo.collider.gameObject.layer == obstacleLayer)
                     {
-                        weight = 1;
+                        //Add a negative weight for an impassible object
+                        navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
+                        continue;
                     }
-
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(weight, currentPosition));
+                    navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
                 }
             }
         }
@@ -62,18 +57,32 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
                 {
-                    if (navMeshGrid.TryGetValue(new Vector3(i, NavmeshHeight, j), out WeightedPosition position))
+                    if (navMeshGrid.TryGetValue(new Vector2(i, j), out TerrainData data))
                     {
-                        if (position.Weight < 0)
+                        if (!data.IsWalkable)
                         {
                             continue;
                         }
                     }
 
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawSphere(new Vector3(i, 0, j), debugRadius);
+                    Gizmos.DrawSphere(data.Position, debugRadius);
                 }
             }
         }
     }
+}
+
+public class TerrainData
+{
+    public TerrainData(Vector3 pos, float cost, bool walkable)
+    {
+        Position = pos;
+        MovementCost = cost;
+        IsWalkable = walkable;
+    }
+
+    public Vector3 Position;
+    public float MovementCost;
+    public bool IsWalkable;
 }
