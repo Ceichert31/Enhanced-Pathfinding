@@ -21,6 +21,9 @@ public class AIAgent : MonoBehaviour
 
     private IPathfinder pathfindingAlgorithm;
 
+    private const float CAPSULE_OFFSET = 1f;
+    private const float GROUND_RAY_DIST = 7f;
+
     private void Awake()
     {
         if (!transform.TryGetComponent(out pathfindingAlgorithm))
@@ -48,7 +51,9 @@ public class AIAgent : MonoBehaviour
             }
         }
 
-        Vector3 moveTo = new Vector3(path[0].x, 1.25f, path[0].z);
+        Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitInfo, GROUND_RAY_DIST);
+
+        Vector3 moveTo = new Vector3(path[0].x, hitInfo.point.y + CAPSULE_OFFSET, path[0].z);
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
