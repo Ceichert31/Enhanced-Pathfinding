@@ -35,7 +35,7 @@ public class NavmeshGeneration : MonoBehaviour
                 Vector2 key = new(i, j);
 
                 //Check for obstacle layer
-                if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT + 3))
+                if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT))
                 {
                     if (hitInfo.collider.gameObject.layer == obstacleLayer)
                     {

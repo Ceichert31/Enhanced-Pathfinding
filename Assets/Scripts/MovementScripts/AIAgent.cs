@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(NavmeshGeneration))]
 public class AIAgent : MonoBehaviour
 {
     //Handle target and agent related stats:
@@ -21,6 +22,8 @@ public class AIAgent : MonoBehaviour
 
     private IPathfinder pathfindingAlgorithm;
 
+    private NavmeshGeneration navmesh;
+
     private const float CAPSULE_OFFSET = 1f;
     private const float GROUND_RAY_DIST = 7f;
 
@@ -30,6 +33,8 @@ public class AIAgent : MonoBehaviour
         {
             throw new NullReferenceException("Please add a pathfinding algorithm to the AI Agent!");
         }
+
+        navmesh = GetComponent<NavmeshGeneration>();
     }
 
 
@@ -40,30 +45,32 @@ public class AIAgent : MonoBehaviour
 
         if (path == null) return;
 
+        navmesh.navMeshGrid.TryGetValue(path[0], out TerrainData data);
+
         if (enableDebug)
         {
-            Vector3 previousPosition = new Vector3(path[0].x, 0, path[0].z);
-            foreach (Vector3 position in path)
+            Vector3 previousPosition = data.Position;
+            foreach (Vector2 position in path)
             {
-               position.Set(position.x, 0, position.z);
-               Debug.DrawLine(previousPosition, position, Color.red);
-               previousPosition = position;
+                navmesh.navMeshGrid.TryGetValue(position, out TerrainData nextPos);
+               Debug.DrawLine(previousPosition, nextPos.Position, Color.red);
+               previousPosition = nextPos.Position;
             }
         }
 
         //Raycast down and get point
-        Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitInfo, GROUND_RAY_DIST);
+        //Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitInfo, GROUND_RAY_DIST);
 
-        Vector3 moveTo = new Vector3(path[0].x, hitInfo.point.y + CAPSULE_OFFSET, path[0].z);
+        Vector3 moveTo = new Vector3(data.Position.x, data.Position.y + CAPSULE_OFFSET, data.Position.z);
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
     private Vector3 RoundVector(Vector3 vector)
     {
         return new Vector3(
-            Mathf.RoundToInt(vector.x),
-            Mathf.RoundToInt(vector.y),
-            Mathf.RoundToInt(vector.z)
+            Mathf.FloorToInt(vector.x),
+            Mathf.FloorToInt(vector.y),
+            Mathf.FloorToInt(vector.z)
             );
     }
 
@@ -71,5 +78,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    List<Vector3> GetPath(Vector3 startPos, Vector3 target);
+    List<Vector2> GetPath(Vector2 startPos, Vector2 target);
 }
