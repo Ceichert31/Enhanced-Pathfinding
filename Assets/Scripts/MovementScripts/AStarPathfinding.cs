@@ -36,7 +36,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         while (frontier.Count > 0)
         {
             var currentPoint = frontier.Dequeue();
-            visited.Add(currentPoint, true);
+            visited.TryAdd(currentPoint, true);
 
             //If current point is end point
             if (currentPoint.Position == endPosition)
@@ -79,12 +79,19 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             List<Vector3> path = new();
 
             path.Add(endPoint.Position);
-            Vector3 current = cameFrom[endPoint.Position];
+            cameFrom.TryGetValue(endPoint.Position, out Vector3 current);
+
+            if (current == null)
+            {
+                return null;
+            }
 
             while (current != startPosition)
             {
                 path.Add(current);
-                current = cameFrom[current];
+
+                if (!cameFrom.TryGetValue(current, out current))
+                    return path;
             }
             path.Reverse();
 
