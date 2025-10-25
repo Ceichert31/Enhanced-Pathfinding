@@ -36,22 +36,11 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
         WeightedPosition endPoint = null;
 
-        int nodesProcessed = 0;
-        int maxNodesToProcess = 11000;
-
         //While frontier has elements
         while (frontier.Count > 0)
         {
             var currentPoint = frontier.Dequeue();
             visited.Add(currentPoint.Position);
-
-            nodesProcessed++;
-
-            if (nodesProcessed > maxNodesToProcess)
-            {
-                Debug.LogWarning($"Pathfinding gave up after processing {nodesProcessed} nodes. Target may be unreachable.");
-                return null;
-            }
 
             //If current point is end point
             if (currentPoint.Position == target)
