@@ -35,7 +35,7 @@ public class NavmeshGeneration : MonoBehaviour
                 Vector2 key = new(i, j);
 
                 //Check for obstacle layer
-                if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT + 3))
+                if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT))
                 {
                     if (hitInfo.collider.gameObject.layer == obstacleLayer)
                     {
@@ -49,6 +49,26 @@ public class NavmeshGeneration : MonoBehaviour
             }
         }
     }
+    /// <summary>
+    /// Generate a 3-Dimensional path from a list of 2D coordinates
+    /// </summary>
+    /// <param name="list2D"></param>
+    /// <returns>A 3D path</returns>
+    public List<Vector3> TransformPathTo3D(ref List<Vector2> list2D)
+    {
+        List<Vector3> result = new();
+        foreach (var item in list2D)
+        {
+            if (navMeshGrid.TryGetValue(item, out TerrainData data))
+            {
+                result.Add(data.Position);
+                continue;
+            }
+            return result;
+        }
+        return result;
+    }
+
     private void OnDrawGizmos()
     {
         if (enableDebug)
@@ -63,10 +83,9 @@ public class NavmeshGeneration : MonoBehaviour
                         {
                             continue;
                         }
+                        Gizmos.color = Color.blue;
+                        Gizmos.DrawSphere(data.Position, debugRadius);
                     }
-
-                    Gizmos.color = Color.blue;
-                    Gizmos.DrawSphere(data.Position, debugRadius);
                 }
             }
         }
