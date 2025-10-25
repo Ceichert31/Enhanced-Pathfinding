@@ -12,6 +12,10 @@ public class NavmeshGeneration : MonoBehaviour
     private Vector2 maxBound;
     [SerializeField]
     private int obstacleLayer;
+    public bool EnableDebug
+    {
+        get => enableDebug; set => enableDebug = value;
+    }
     [SerializeField]
     private bool enableDebug;
 
