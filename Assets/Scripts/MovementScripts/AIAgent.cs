@@ -43,6 +43,8 @@ public class AIAgent : MonoBehaviour
     private IPathfinder pathfindingAlgorithm;
     private PathSmoothing pathSmoothingAlgorithm;
 
+    private LineRenderer lineRenderer;
+
     private const float CAPSULE_OFFSET = 1f;
     private void Awake()
     {
@@ -54,6 +56,7 @@ public class AIAgent : MonoBehaviour
         {
             throw new NullReferenceException("Please add a path smoothing algorithm to the AI Agent!");
         }
+        lineRenderer = GetComponent<LineRenderer>();
     }
 
 
@@ -71,13 +74,13 @@ public class AIAgent : MonoBehaviour
 
         if (enableDebug)
         {
-            Vector3 previousPosition = path[0];
-            foreach (Vector3 position in path)
+            lineRenderer.positionCount = path.Count;
+            for (int i = 0; i < path.Count; ++i)
             {
-               Debug.DrawLine(previousPosition, position, Color.red);
-               previousPosition = position;
+                lineRenderer.SetPosition(i, path[i]);
             }
         }
+
         Vector3 moveTo = new(path[0].x, path[0].y + CAPSULE_OFFSET, path[0].z);
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }

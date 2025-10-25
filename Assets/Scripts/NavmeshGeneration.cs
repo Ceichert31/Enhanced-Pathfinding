@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 
 public class NavmeshGeneration : MonoBehaviour
@@ -22,9 +23,16 @@ public class NavmeshGeneration : MonoBehaviour
     [Range(3f, 5f)]
     [SerializeField]
     private int debugResolution = 5;
-    [SerializeField]
-    private float debugRadius = 0.5f;
 
+    [SerializeField]
+    private GameObject debugPrefab;
+
+    [SerializeField]
+    private Transform debugParent;
+
+    private Dictionary<Vector2, GameObject> debugGrid = new();
+
+    private const int MAX_DEBUG_OBJECTS = 1000;
     private const float NAVMESH_HEIGHT = 100.0f;
 
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
@@ -37,6 +45,9 @@ public class NavmeshGeneration : MonoBehaviour
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
             {
                 Vector2 key = new(i, j);
+
+                //Add debug object
+                debugGrid.Add(key, Instantiate(debugPrefab,debugParent));
 
                 //Check for obstacle layer
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT))
@@ -53,6 +64,29 @@ public class NavmeshGeneration : MonoBehaviour
             }
         }
     }
+
+    private void Update()
+    {
+        if (enableDebug)
+        {
+            for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
+            {
+                for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
+                {
+                    if (debugGrid.TryGetValue(new Vector2(i, j), out GameObject debugObject) && navMeshGrid.TryGetValue(new Vector2(i, j), out TerrainData data))
+                    {
+                        if (!data.IsWalkable)
+                        {
+                            continue;
+                        }
+                        debugObject.transform.position = data.Position;
+                        debugObject.SetActive(true);
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Generate a 3-Dimensional path from a list of 2D coordinates
     /// </summary>
@@ -71,28 +105,6 @@ public class NavmeshGeneration : MonoBehaviour
             return result;
         }
         return result;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (enableDebug)
-        {
-            for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
-            {
-                for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
-                {
-                    if (navMeshGrid.TryGetValue(new Vector2(i, j), out TerrainData data))
-                    {
-                        if (!data.IsWalkable)
-                        {
-                            continue;
-                        }
-                        Gizmos.color = Color.blue;
-                        Gizmos.DrawSphere(data.Position, debugRadius);
-                    }
-                }
-            }
-        }
     }
 }
 
