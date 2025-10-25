@@ -18,9 +18,16 @@ public class AIAgent : MonoBehaviour
     private float agentSpeed = 1f;
 
     [SerializeField]
+    private bool smoothingEnabled = false;
+
+    [SerializeField]
+    private int smoothingSegments = 3;
+
+    [SerializeField]
     private bool enableDebug;
 
     private IPathfinder pathfindingAlgorithm;
+    private PathSmoothing pathSmoothingAlgorithm;
 
     private NavmeshGeneration navmesh;
 
@@ -35,6 +42,10 @@ public class AIAgent : MonoBehaviour
         }
 
         navmesh = GetComponent<NavmeshGeneration>();
+        if (!transform.TryGetComponent(out pathSmoothingAlgorithm))
+        {
+            throw new NullReferenceException("Please add a path smoothing algorithm to the AI Agent!");
+        }
     }
 
 
@@ -44,6 +55,11 @@ public class AIAgent : MonoBehaviour
         var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)));
 
         if (path == null) return;
+
+        if (smoothingEnabled)
+        {
+            path = pathSmoothingAlgorithm.SmoothPath(path, smoothingSegments);
+        }
 
         if (enableDebug)
         {
