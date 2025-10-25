@@ -811,6 +811,7 @@ GameObject:
   - component: {fileID: 1578448127}
   - component: {fileID: 1578448126}
   - component: {fileID: 1578448125}
+  - component: {fileID: 1578448132}
   m_Layer: 0
   m_Name: AIAgent
   m_TagString: Untagged
@@ -844,6 +845,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 732563883}
   agentSpeed: 4
+  smoothingEnabled: 1
+  smoothingSegments: 3
   enableDebug: 1
 --- !u!114 &1578448127
 MonoBehaviour:
@@ -862,7 +865,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 8
-  enableDebug: 0
+  enableDebug: 1
   debugResolution: 3
   debugRadius: 0.5
 --- !u!136 &1578448128
@@ -944,6 +947,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1578448132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1578448124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f13ab7426c605e64ea6b85e890541d6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1890068884
 GameObject:
   m_ObjectHideFlags: 0
