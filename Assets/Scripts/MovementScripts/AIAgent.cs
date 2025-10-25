@@ -52,9 +52,14 @@ public class AIAgent : MonoBehaviour
     private void Update()
     {
         //Get path to target
-        var path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
+        var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)));
 
         if (path == null) return;
+
+        if (smoothingEnabled)
+        {
+            path = pathSmoothingAlgorithm.SmoothPath(path, smoothingSegments);
+        }
 
         if (enableDebug)
         {
