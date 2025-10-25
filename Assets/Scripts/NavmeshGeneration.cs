@@ -26,6 +26,8 @@ public class NavmeshGeneration : MonoBehaviour
 
     [SerializeField]
     private GameObject debugPrefab;
+    [SerializeField]
+    private GameObject obstaclePrefab;
 
     [SerializeField]
     private Transform debugParent;
@@ -40,6 +42,25 @@ public class NavmeshGeneration : MonoBehaviour
     public Vector2 MaximumBoundary => maxBound;
     public void Awake()
     {
+        GenerateNavMesh();
+    }
+
+    private void GenerateNavMesh()
+    {
+        for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
+        {
+            for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
+            {
+                if (debugGrid.TryGetValue(new Vector2(i, j), out GameObject debugObject))
+                {
+                    Destroy(debugObject);
+                }
+            }
+        }
+
+        debugGrid.Clear();
+        navMeshGrid.Clear();
+
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
         {
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
@@ -47,7 +68,7 @@ public class NavmeshGeneration : MonoBehaviour
                 Vector2 key = new(i, j);
 
                 //Add debug object
-                debugGrid.Add(key, Instantiate(debugPrefab,debugParent));
+                debugGrid.Add(key, Instantiate(debugPrefab, debugParent));
 
                 //Check for obstacle layer
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT))
@@ -85,6 +106,31 @@ public class NavmeshGeneration : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
+            {
+                for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
+                {
+                    if (debugGrid.TryGetValue(new Vector2(i, j), out GameObject debugObject) && navMeshGrid.TryGetValue(new Vector2(i, j), out TerrainData data))
+                    {
+                        if (!data.IsWalkable)
+                        {
+                            continue;
+                        }
+                        debugObject.transform.position = data.Position;
+                        debugObject.SetActive(false);
+                    }
+                }
+            }
+        }
+    }
+
+    public void PlaceRandomObject()
+    {
+        Vector3 position = new Vector3(Random.Range(minBound.x, maxBound.x), 0, Random.Range(minBound.y, maxBound.y));
+        Instantiate(obstaclePrefab, position, Quaternion.identity);
+        GenerateNavMesh();
     }
 
     /// <summary>
