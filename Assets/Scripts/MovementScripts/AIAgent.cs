@@ -17,15 +17,26 @@ public class AIAgent : MonoBehaviour
     private float agentSpeed = 1f;
 
     [SerializeField]
+    private bool smoothingEnabled = false;
+
+    [SerializeField]
+    private int smoothingSegments = 3;
+
+    [SerializeField]
     private bool enableDebug;
 
     private IPathfinder pathfindingAlgorithm;
+    private PathSmoothing pathSmoothingAlgorithm;
 
     private void Awake()
     {
         if (!transform.TryGetComponent(out pathfindingAlgorithm))
         {
             throw new NullReferenceException("Please add a pathfinding algorithm to the AI Agent!");
+        }
+        if (!transform.TryGetComponent(out pathSmoothingAlgorithm))
+        {
+            throw new NullReferenceException("Please add a path smoothing algorithm to the AI Agent!");
         }
     }
 
@@ -34,6 +45,10 @@ public class AIAgent : MonoBehaviour
     {
         //Get path to target
         var path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
+        if(smoothingEnabled)
+        {
+            path = pathSmoothingAlgorithm.SmoothPath(path, smoothingSegments);
+        }
 
         if (path == null) return;
 
