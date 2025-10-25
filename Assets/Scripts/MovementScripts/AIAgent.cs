@@ -41,36 +41,32 @@ public class AIAgent : MonoBehaviour
     private void Update()
     {
         //Get path to target
-        var path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
+        var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)));
 
         if (path == null) return;
 
-        navmesh.navMeshGrid.TryGetValue(path[0], out TerrainData data);
-
         if (enableDebug)
         {
-            Vector3 previousPosition = data.Position;
-            foreach (Vector2 position in path)
+            Vector3 previousPosition = path[0];
+            foreach (Vector3 position in path)
             {
-                navmesh.navMeshGrid.TryGetValue(position, out TerrainData nextPos);
-               Debug.DrawLine(previousPosition, nextPos.Position, Color.red);
-               previousPosition = nextPos.Position;
+               Debug.DrawLine(previousPosition, position, Color.red);
+               previousPosition = position;
             }
         }
 
         //Raycast down and get point
         //Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitInfo, GROUND_RAY_DIST);
 
-        Vector3 moveTo = new Vector3(data.Position.x, data.Position.y + CAPSULE_OFFSET, data.Position.z);
+        Vector3 moveTo = new Vector3(path[0].x, path[0].y + CAPSULE_OFFSET, path[0].z);
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
-    private Vector3 RoundVector(Vector3 vector)
+    private Vector3 RoundVector(Vector2 vector)
     {
         return new Vector3(
-            Mathf.FloorToInt(vector.x),
-            Mathf.FloorToInt(vector.y),
-            Mathf.FloorToInt(vector.z)
+            Mathf.RoundToInt(vector.x),
+            Mathf.RoundToInt(vector.y)
             );
     }
 
@@ -78,5 +74,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    List<Vector2> GetPath(Vector2 startPos, Vector2 target);
+    List<Vector3> GetPath(Vector2 startPos, Vector2 target);
 }

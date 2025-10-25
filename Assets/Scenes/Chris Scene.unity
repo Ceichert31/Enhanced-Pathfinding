@@ -489,6 +489,10 @@ PrefabInstance:
       value: 127
       objectReference: {fileID: 0}
     - target: {fileID: 8939591259619301516, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
+      propertyPath: offsetStrength
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8939591259619301516, guid: b59b9ea62f378d04da1442badcd2d715, type: 3}
       propertyPath: expandDevMenuEvent
       value: 
       objectReference: {fileID: 11400000, guid: cbed18d2ac478d645b4b26295b587847, type: 2}

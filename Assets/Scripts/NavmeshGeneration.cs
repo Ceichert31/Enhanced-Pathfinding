@@ -43,12 +43,38 @@ public class NavmeshGeneration : MonoBehaviour
                         navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
                     }
+                    float weight = hitInfo.point.y;
+                    if (weight <= 0)
+                    {
+                        weight = 1;
+                    }
+
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
+                    navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), weight, true));
                 }
             }
         }
     }
+    /// <summary>
+    /// Generate a 3-Dimensional path from a list of 2D coordinates
+    /// </summary>
+    /// <param name="list2D"></param>
+    /// <returns>A 3D path</returns>
+    public List<Vector3> TransformPathTo3D(ref List<Vector2> list2D)
+    {
+        List<Vector3> result = new();
+        foreach (var item in list2D)
+        {
+            if (navMeshGrid.TryGetValue(item, out TerrainData data))
+            {
+                result.Add(data.Position);
+                continue;
+            }
+            return result;
+        }
+        return result;
+    }
+
     private void OnDrawGizmos()
     {
         if (enableDebug)

@@ -14,7 +14,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public List<Vector2> GetPath(Vector2 startPos, Vector2 target)
+    public List<Vector3> GetPath(Vector2 startPos, Vector2 target)
     {
         Dictionary<WeightedPosition, float> costSoFar = new();
         Dictionary<Vector2, Vector2> cameFrom = new();
@@ -39,7 +39,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             //If current point is end point
             if (currentPoint.Position == target)
             {
-                Debug.Log($"Checking position: {currentPoint.Position} against target: {target}");
                 endPoint = currentPoint;
                 break;
             }
@@ -53,7 +52,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             foreach (var neighbor in neighbors) 
             {
                 //Calculate new cost of travel
-                float newCost = costSoFar[currentPoint] + neighbor.Weight + 1;
+                float newCost = costSoFar[currentPoint] + neighbor.Weight;
 
                 //Check if the neighbor exists already in the frontier and if it does, check its old cost
                 if (!frontierSet.Contains(neighbor) || costSoFar[neighbor] > newCost)
@@ -73,6 +72,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         }
 
         //If we find an end point
+        //Convert from 2D space to 3D space with navmesh
         if (endPoint != null)
         {
             List<Vector2> path = new();
@@ -87,14 +87,24 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
             while (current != startPos)
             {
+                if (path.Count > 1000)
+                {
+                    Debug.LogError($"Path reconstruction exceeded 1000 nodes! Current: {current}, Start: {startPos}");
+                    return null;
+                }
+
                 path.Add(current);
 
+                //If we can't get pos, return what we have so far
                 if (!cameFrom.TryGetValue(current, out current))
-                    return path;
+                {
+                    path.Reverse();
+                    return navmesh.TransformPathTo3D(ref path);
+                } 
             }
             path.Reverse();
 
-            return path;
+            return navmesh.TransformPathTo3D(ref path);
         }
 
         return null;
