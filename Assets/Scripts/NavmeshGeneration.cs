@@ -43,14 +43,8 @@ public class NavmeshGeneration : MonoBehaviour
                         navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
                     }
-                    float weight = hitInfo.point.y;
-                    if (weight <= 0)
-                    {
-                        weight = 1;
-                    }
-
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), weight, true));
+                    navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
                 }
             }
         }
@@ -89,10 +83,9 @@ public class NavmeshGeneration : MonoBehaviour
                         {
                             continue;
                         }
+                        Gizmos.color = Color.blue;
+                        Gizmos.DrawSphere(data.Position, debugRadius);
                     }
-
-                    Gizmos.color = Color.blue;
-                    Gizmos.DrawSphere(data.Position, debugRadius);
                 }
             }
         }
