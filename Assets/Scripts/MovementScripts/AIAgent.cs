@@ -80,6 +80,10 @@ public class AIAgent : MonoBehaviour
                 lineRenderer.SetPosition(i, path[i]);
             }
         }
+        else
+        {
+            lineRenderer.positionCount = 0;
+        }
 
         Vector3 moveTo = new(path[0].x, path[0].y + CAPSULE_OFFSET, path[0].z);
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
