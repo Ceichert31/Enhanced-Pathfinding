@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(NavmeshGeneration))]
 public class AIAgent : MonoBehaviour
 {
     //Handle target and agent related stats:
@@ -28,12 +29,19 @@ public class AIAgent : MonoBehaviour
     private IPathfinder pathfindingAlgorithm;
     private PathSmoothing pathSmoothingAlgorithm;
 
+    private NavmeshGeneration navmesh;
+
+    private const float CAPSULE_OFFSET = 1f;
+    private const float GROUND_RAY_DIST = 7f;
+
     private void Awake()
     {
         if (!transform.TryGetComponent(out pathfindingAlgorithm))
         {
             throw new NullReferenceException("Please add a pathfinding algorithm to the AI Agent!");
         }
+
+        navmesh = GetComponent<NavmeshGeneration>();
         if (!transform.TryGetComponent(out pathSmoothingAlgorithm))
         {
             throw new NullReferenceException("Please add a path smoothing algorithm to the AI Agent!");
@@ -45,34 +53,27 @@ public class AIAgent : MonoBehaviour
     {
         //Get path to target
         var path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
-        if(smoothingEnabled)
-        {
-            path = pathSmoothingAlgorithm.SmoothPath(path, smoothingSegments);
-        }
 
         if (path == null) return;
 
         if (enableDebug)
         {
-            Vector3 previousPosition = new Vector3(path[0].x, 0, path[0].z);
+            Vector3 previousPosition = path[0];
             foreach (Vector3 position in path)
             {
-               position.Set(position.x, 0, position.z);
                Debug.DrawLine(previousPosition, position, Color.red);
                previousPosition = position;
             }
         }
-
-        Vector3 moveTo = new Vector3(path[0].x, 1.25f, path[0].z);
+        Vector3 moveTo = new(path[0].x, path[0].y + CAPSULE_OFFSET, path[0].z);
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
-    private Vector3 RoundVector(Vector3 vector)
+    private Vector3 RoundVector(Vector2 vector)
     {
-        return new Vector3(
+        return new Vector2(
             Mathf.RoundToInt(vector.x),
-            Mathf.RoundToInt(vector.y),
-            Mathf.RoundToInt(vector.z)
+            Mathf.RoundToInt(vector.y)
             );
     }
 
@@ -80,5 +81,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    List<Vector3> GetPath(Vector3 startPos, Vector3 target);
+    List<Vector3> GetPath(Vector2 startPos, Vector2 target);
 }

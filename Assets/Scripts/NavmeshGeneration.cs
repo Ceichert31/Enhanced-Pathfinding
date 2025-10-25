@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class NavmeshGeneration : MonoBehaviour
 {
-    public Dictionary<Vector3, WeightedPosition> navMeshGrid = new();
+    public Dictionary<Vector2, TerrainData> navMeshGrid = new();
 
     [SerializeField]
     private Vector2 minBound;
     [SerializeField]
     private Vector2 maxBound;
     [SerializeField]
-    private LayerMask obstacleLayer;
+    private int obstacleLayer;
     [SerializeField]
     private bool enableDebug;
 
@@ -32,22 +32,43 @@ public class NavmeshGeneration : MonoBehaviour
         {
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
             {
-                Vector3 currentPosition = new(i, NAVMESH_HEIGHT, j);
+                Vector2 key = new(i, j);
 
                 //Check for obstacle layer
-                if (Physics.Raycast(currentPosition, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, obstacleLayer))
+                if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT))
                 {
-                    //Add a negative weight for an impassible object
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(-1, currentPosition));
-                }
-                else
-                {
+                    if (hitInfo.collider.gameObject.layer == obstacleLayer)
+                    {
+                        //Add a negative weight for an impassible object
+                        navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
+                        continue;
+                    }
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(currentPosition, new WeightedPosition(1, currentPosition));
+                    navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
                 }
             }
         }
     }
+    /// <summary>
+    /// Generate a 3-Dimensional path from a list of 2D coordinates
+    /// </summary>
+    /// <param name="list2D"></param>
+    /// <returns>A 3D path</returns>
+    public List<Vector3> TransformPathTo3D(ref List<Vector2> list2D)
+    {
+        List<Vector3> result = new();
+        foreach (var item in list2D)
+        {
+            if (navMeshGrid.TryGetValue(item, out TerrainData data))
+            {
+                result.Add(data.Position);
+                continue;
+            }
+            return result;
+        }
+        return result;
+    }
+
     private void OnDrawGizmos()
     {
         if (enableDebug)
@@ -56,18 +77,31 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
                 {
-                    if (navMeshGrid.TryGetValue(new Vector3(i, NavmeshHeight, j), out WeightedPosition position))
+                    if (navMeshGrid.TryGetValue(new Vector2(i, j), out TerrainData data))
                     {
-                        if (position.Weight < 0)
+                        if (!data.IsWalkable)
                         {
                             continue;
                         }
+                        Gizmos.color = Color.blue;
+                        Gizmos.DrawSphere(data.Position, debugRadius);
                     }
-
-                    Gizmos.color = Color.blue;
-                    Gizmos.DrawSphere(new Vector3(i, 0, j), debugRadius);
                 }
             }
         }
     }
+}
+
+public class TerrainData
+{
+    public TerrainData(Vector3 pos, float cost, bool walkable)
+    {
+        Position = pos;
+        MovementCost = cost;
+        IsWalkable = walkable;
+    }
+
+    public Vector3 Position;
+    public float MovementCost;
+    public bool IsWalkable;
 }
