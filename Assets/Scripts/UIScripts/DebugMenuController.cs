@@ -16,7 +16,7 @@ public class DebugMenuController : MonoBehaviour
     {
         if (ctx.Value)
         {
-            debugMenu.DOAnchorPosY(500, doTweenDuration).SetEase(Ease.InOutCubic);
+            debugMenu.DOAnchorPosY(400, doTweenDuration).SetEase(Ease.InOutCubic);
             Cursor.lockState = CursorLockMode.None;
         }
         else
