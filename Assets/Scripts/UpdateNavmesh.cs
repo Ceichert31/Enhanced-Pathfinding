@@ -13,6 +13,7 @@ public class UpdateNavmesh : MonoBehaviour
     public void EnableDebug(BoolEvent ctx)
     {
         navmesh.EnableDebug = ctx.Value;
+        navmesh.EnableDebugMode();
     }
     public void AddObstacle(VoidEvent ctx)
     {

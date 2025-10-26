@@ -86,7 +86,7 @@ public class NavmeshGeneration : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void EnableDebugMode()
     {
         if (enableDebug)
         {
