@@ -9,6 +9,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 {
     private NavmeshGeneration navmesh;
 
+    private const float DEFAULT_MOVEMENT_COST = 1f;
+
     private void Start()
     {
         navmesh = GetComponent<NavmeshGeneration>();
@@ -58,7 +60,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             foreach (var neighbor in neighbors) 
             {
                 //Calculate new cost of travel
-                float newCost = costSoFar[currentPoint] + neighbor.Weight;
+                float newCost = costSoFar[currentPoint] + neighbor.Weight + DEFAULT_MOVEMENT_COST;
 
                 //Check if the neighbor exists already in the frontier and if it does, check its old cost
                 if (!frontierSet.Contains(neighbor.Position) || costSoFar[neighbor] > newCost)
@@ -94,12 +96,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             //Recreate path
             while (current != startPos)
             {
-                if (path.Count > 1000)
-                {
-                    Debug.LogError($"Path reconstruction exceeded 1000 nodes! Current: {current}, Start: {startPos}");
-                    return null;
-                }
-
                 path.Add(current);
 
                 //If we can't get pos, break the loop

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class NavmeshGeneration : MonoBehaviour
 {
@@ -34,9 +35,7 @@ public class NavmeshGeneration : MonoBehaviour
 
     private Dictionary<Vector2, GameObject> debugGrid = new();
 
-    private const int MAX_DEBUG_OBJECTS = 1000;
     private const float NAVMESH_HEIGHT = 100.0f;
-
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
@@ -47,6 +46,7 @@ public class NavmeshGeneration : MonoBehaviour
 
     private void GenerateNavMesh()
     {
+        //Clear old debug objects
         for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
         {
             for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
@@ -66,9 +66,6 @@ public class NavmeshGeneration : MonoBehaviour
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
             {
                 Vector2 key = new(i, j);
-
-                //Add debug object
-                debugGrid.Add(key, Instantiate(debugPrefab, debugParent));
 
                 //Check for obstacle layer
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT))
@@ -94,14 +91,17 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
                 {
-                    if (debugGrid.TryGetValue(new Vector2(i, j), out GameObject debugObject) && navMeshGrid.TryGetValue(new Vector2(i, j), out TerrainData data))
+                    Vector2 key = new(i, j);
+
+                    if (navMeshGrid.TryGetValue(key, out TerrainData data))
                     {
                         if (!data.IsWalkable)
                         {
                             continue;
                         }
-                        debugObject.transform.position = data.Position;
-                        debugObject.SetActive(true);
+
+                        //Add debug object
+                        debugGrid.Add(key, Instantiate(debugPrefab, data.Position, Quaternion.identity, debugParent));
                     }
                 }
             }
@@ -112,14 +112,11 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
                 {
-                    if (debugGrid.TryGetValue(new Vector2(i, j), out GameObject debugObject) && navMeshGrid.TryGetValue(new Vector2(i, j), out TerrainData data))
+                    Vector2 key = new(i, j);
+                    if (debugGrid.TryGetValue(key, out GameObject debugObject))
                     {
-                        if (!data.IsWalkable)
-                        {
-                            continue;
-                        }
-                        debugObject.transform.position = data.Position;
-                        debugObject.SetActive(false);
+                        Destroy(debugObject);
+                        debugGrid.Remove(key);
                     }
                 }
             }
