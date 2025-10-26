@@ -65,7 +65,6 @@ public class AIAgent : MonoBehaviour
     /// </summary>
     public void ResetAgent()
     {
-        AgentSpeed = 0f;
         transform.position = new(0, CAPSULE_OFFSET, 0);
     }
 
@@ -74,7 +73,11 @@ public class AIAgent : MonoBehaviour
         //Get path to target
         var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)));
 
-        if (path == null) return;
+        if (path == null)
+        {
+            lineRenderer.positionCount = 0;
+            return;
+        }
 
         if (smoothingEnabled)
         {

@@ -64,9 +64,11 @@ public class NavmeshGeneration : MonoBehaviour
             }
         }
 
+        //Clear old navmesh
         debugGrid.Clear();
         navMeshGrid.Clear();
 
+        //Raycast and generate navmesh
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
         {
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
@@ -87,6 +89,9 @@ public class NavmeshGeneration : MonoBehaviour
                 }
             }
         }
+
+        //Add debug visuals
+        EnableDebugMode();
     }
 
     /// <summary>
