@@ -46,6 +46,7 @@ public class AIAgent : MonoBehaviour
     private LineRenderer lineRenderer;
 
     private const float CAPSULE_OFFSET = 1f;
+    private const float DEBUG_LINE_OFFSET = 0.5f;
     private void Awake()
     {
         if (!transform.TryGetComponent(out pathfindingAlgorithm))
@@ -85,7 +86,7 @@ public class AIAgent : MonoBehaviour
             lineRenderer.positionCount = path.Count;
             for (int i = 0; i < path.Count; ++i)
             {
-                lineRenderer.SetPosition(i, path[i]);
+                lineRenderer.SetPosition(i, new(path[i].x, path[i].y + DEBUG_LINE_OFFSET, path[i].z));
             }
         }
         else
