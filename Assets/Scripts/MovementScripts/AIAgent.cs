@@ -73,7 +73,7 @@ public class AIAgent : MonoBehaviour
         //Get path to target
         var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)));
 
-        if (path == null)
+        if (path == null || path.Count <= 1)
         {
             lineRenderer.positionCount = 0;
             return;
