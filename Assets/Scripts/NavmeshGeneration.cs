@@ -33,6 +33,9 @@ public class NavmeshGeneration : MonoBehaviour
     [SerializeField]
     private Transform debugParent;
 
+    [SerializeField]
+    private Transform obstacleParent;
+
     private Dictionary<Vector2, GameObject> debugGrid = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
@@ -44,6 +47,9 @@ public class NavmeshGeneration : MonoBehaviour
         GenerateNavMesh();
     }
 
+    /// <summary>
+    /// Clears and reconstructs the navmesh
+    /// </summary>
     private void GenerateNavMesh()
     {
         //Clear old debug objects
@@ -83,6 +89,9 @@ public class NavmeshGeneration : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows a debug visual of the navmesh
+    /// </summary>
     public void EnableDebugMode()
     {
         if (enableDebug)
@@ -123,13 +132,27 @@ public class NavmeshGeneration : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Adds a random obstacle to the navmesh
+    /// </summary>
     public void PlaceRandomObject()
     {
         Vector3 position = new Vector3(Random.Range(minBound.x, maxBound.x), 0, Random.Range(minBound.y, maxBound.y));
-        Instantiate(obstaclePrefab, position, Quaternion.identity);
+        Instantiate(obstaclePrefab, position, Quaternion.identity, obstacleParent);
         GenerateNavMesh();
     }
 
+    /// <summary>
+    /// Destroys all obstacles and resets the navmesh
+    /// </summary>
+    public void ResetNavmesh()
+    {
+        for (int i = 0; i < obstacleParent.childCount; ++i)
+        {
+            Destroy(obstacleParent.GetChild(i).gameObject);
+        }
+        GenerateNavMesh();
+    }
     /// <summary>
     /// Generate a 3-Dimensional path from a list of 2D coordinates
     /// </summary>

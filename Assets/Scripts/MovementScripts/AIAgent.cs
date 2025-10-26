@@ -59,6 +59,14 @@ public class AIAgent : MonoBehaviour
         lineRenderer = GetComponent<LineRenderer>();
     }
 
+    /// <summary>
+    /// Resets the agents position
+    /// </summary>
+    public void ResetAgent()
+    {
+        AgentSpeed = 0f;
+        transform.position = new(0, CAPSULE_OFFSET, 0);
+    }
 
     private void Update()
     {

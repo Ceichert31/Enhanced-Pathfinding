@@ -19,4 +19,8 @@ public class UpdateNavmesh : MonoBehaviour
     {
         navmesh.PlaceRandomObject();
     }
+    public void ResetNavmesh(VoidEvent ctx)
+    {
+        navmesh.ResetNavmesh();
+    }
 }

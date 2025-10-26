@@ -26,5 +26,9 @@ public class UpdateAIAgent : MonoBehaviour
     {
         agent.SmoothingSegments = (int)ctx.FloatValue;
     }
+    public void ResetAgent(VoidEvent ctx)
+    {
+        agent.ResetAgent();
+    }
 
 }
