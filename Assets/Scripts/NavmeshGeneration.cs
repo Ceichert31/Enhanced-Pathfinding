@@ -37,6 +37,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Transform obstacleParent;
 
     private Dictionary<Vector2, GameObject> debugGrid = new();
+    private Dictionary<Vector2, HashSet<Vector2>> hasConnection = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
@@ -46,6 +47,8 @@ public class NavmeshGeneration : MonoBehaviour
     {
         GenerateNavMesh();
     }
+
+    //Generate edges between nodes, and don't generate edges if there is a big height difference
 
     /// <summary>
     /// Clears and reconstructs the navmesh
@@ -67,8 +70,9 @@ public class NavmeshGeneration : MonoBehaviour
         //Clear old navmesh
         debugGrid.Clear();
         navMeshGrid.Clear();
+        //hasConnection.Clear();
 
-        //Raycast and generate navmesh
+        //Ray-cast and generate navmesh
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
         {
             for (int j = (int)minBound.y; j < maxBound.y; ++j)
