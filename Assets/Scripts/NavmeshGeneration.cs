@@ -39,7 +39,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Dictionary<Vector2, HashSet<Vector2>> hasConnection = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
-    private const float MAX_HEIGHT_DIFFERENCE = 2f;
+    private const float MAX_HEIGHT_DIFFERENCE = 1f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;

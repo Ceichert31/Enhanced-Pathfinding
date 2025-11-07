@@ -64,7 +64,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             foreach (var neighbor in neighbors) 
             {
                 //Calculate new cost of travel
-                float newCost = costSoFar[currentPoint] + neighbor.Weight + DEFAULT_MOVEMENT_COST;
+                float newCost = costSoFar[currentPoint] + DEFAULT_MOVEMENT_COST;
 
                 //Check if the neighbor exists already in the frontier and if it does, check its old cost
                 if (!frontierSet.Contains(neighbor.Position) || costSoFar[neighbor] > newCost)
