@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -92,30 +93,7 @@ public class NavmeshGeneration : MonoBehaviour
                         continue;
                     }
 
-                    //Check difference in heights, if the difference is too great,
-                    //then the AI can't path find
-                    if (navMeshGrid.TryGetValue(previousKey, out TerrainData data))
-                    {
-                        float heightDifference = Mathf.Abs(data.Position.y - hitInfo.point.y);
-                        if (heightDifference < MAX_HEIGHT_DIFFERENCE)
-                        {
-                            //Access hash set if it already has one
-                            if (hasConnection.ContainsKey(key))
-                            {
-                                if (hasConnection.TryGetValue(key, out HashSet<Vector2> set))
-                                {
-                                    set.Add(previousKey);
-                                }
-                            }
-                            //Otherwise create new hash set and insert it
-                            else
-                            {
-                                var set = new HashSet<Vector2>();
-                                set.Add(previousKey);
-                                hasConnection.TryAdd(key, set);
-                            }
-                        }
-                    }
+                    AddConnections(key, hitInfo.point.y);
 
                     //Set cost as the height of the point of contact
                     navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
@@ -126,6 +104,51 @@ public class NavmeshGeneration : MonoBehaviour
 
         //Add debug visuals
         EnableDebugMode();
+    }
+
+    /// <summary>
+    /// Adds connections for all four neighbors
+    /// </summary>
+    /// <param name="key">The current position on navmesh</param>
+    /// <param name="hitPointHeight">The height we are comparing to</param>
+    private void AddConnections(Vector2 key, float hitPointHeight)
+    {
+        for (int i = (int)key.x -1; i < (int)key.x + 2; ++i)
+        {
+            for (int j = (int)key.y -1; j < (int)key.y + 2; ++j)
+            {
+                if (i == key.x && j == key.y)
+                    continue;
+
+                var neighborKey = new Vector2(i, j);
+
+                //Check difference in heights, if the difference is too great,
+                //then the AI can't path find
+                if (navMeshGrid.TryGetValue(neighborKey, out TerrainData data))
+                {
+                    float heightDifference = Mathf.Abs(data.Position.y - hitPointHeight);
+                    if (heightDifference < MAX_HEIGHT_DIFFERENCE)
+                    {
+                        //Access hash set if it already has one
+                        if (hasConnection.ContainsKey(key))
+                        {
+                            if (hasConnection.TryGetValue(key, out HashSet<Vector2> set))
+                            {
+                                set.Add(neighborKey);
+                            }
+                        }
+                        //Otherwise create new hash set and insert it
+                        else
+                        {
+                            var set = new HashSet<Vector2>();
+                            set.Add(neighborKey);
+                            hasConnection.TryAdd(key, set);
+                        }
+                    }
+                }
+
+            }
+        }
     }
 
     /// <summary>
