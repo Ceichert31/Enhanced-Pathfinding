@@ -229,6 +229,29 @@ public class NavmeshGeneration : MonoBehaviour
         }
         return false;
     }
+
+    private void Update()
+    {
+        for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
+        {
+            for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
+            {
+                Vector2 key = new(i, j);
+
+                if (!navMeshGrid.TryGetValue(key, out TerrainData data))
+                    continue;
+
+                if (hasConnection.TryGetValue(key, out HashSet<Vector2> connections))
+                {
+                    foreach (var connection in connections)
+                    {
+                        if (navMeshGrid.TryGetValue(connection, out TerrainData connectionData))
+                            Debug.DrawLine(data.Position, connectionData.Position, Color.red);
+                    }
+                }
+            }
+        }
+    }
 }
 
 public class TerrainData
