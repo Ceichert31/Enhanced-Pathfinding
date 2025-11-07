@@ -40,6 +40,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Dictionary<Vector2, HashSet<Vector2>> hasConnection = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
+    private const float MAX_HEIGHT_DIFFERENCE = 5f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
@@ -70,7 +71,9 @@ public class NavmeshGeneration : MonoBehaviour
         //Clear old navmesh
         debugGrid.Clear();
         navMeshGrid.Clear();
-        //hasConnection.Clear();
+        hasConnection.Clear();
+
+        Vector2 previousKey = new(0,0);
 
         //Ray-cast and generate navmesh
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
@@ -88,9 +91,36 @@ public class NavmeshGeneration : MonoBehaviour
                         navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
                     }
+
+                    //Check difference in heights, if the difference is too great,
+                    //then the AI can't path find
+                    if (navMeshGrid.TryGetValue(previousKey, out TerrainData data))
+                    {
+                        float heightDifference = Mathf.Abs(data.Position.y - hitInfo.point.y);
+                        if (heightDifference < MAX_HEIGHT_DIFFERENCE)
+                        {
+                            //Access hash set if it already has one
+                            if (hasConnection.ContainsKey(key))
+                            {
+                                if (hasConnection.TryGetValue(key, out HashSet<Vector2> set))
+                                {
+                                    set.Add(previousKey);
+                                }
+                            }
+                            //Otherwise create new hash set and insert it
+                            else
+                            {
+                                var set = new HashSet<Vector2>();
+                                set.Add(previousKey);
+                                hasConnection.TryAdd(key, set);
+                            }
+                        }
+                    }
+
                     //Set cost as the height of the point of contact
                     navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
                 }
+                previousKey = key;
             }
         }
 
@@ -180,6 +210,24 @@ public class NavmeshGeneration : MonoBehaviour
             return result;
         }
         return result;
+    }
+
+    /// <summary>
+    /// Check the connections map for connection between nodes
+    /// </summary>
+    /// <param name="currentPos">The algorithms current position</param>
+    /// <param name="neighborPos">The algorithms next position</param>
+    /// <returns>Whether the agent can traverse here</returns>
+    public bool CheckForConnection(Vector2 currentPos, Vector2 neighborPos)
+    {
+        if (hasConnection.TryGetValue(currentPos, out HashSet<Vector2> set))
+        {
+            if (set.Contains(neighborPos))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
