@@ -84,7 +84,7 @@ public class NavmeshGeneration : MonoBehaviour
                 //Check for obstacle layer
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
                 {
-                    if (hitInfo.collider.gameObject.layer == obstacleLayer)
+                    if (hitInfo.collider.gameObject.tag == "obstacle")
                     {
                         //Add a negative weight for an impassible object
                         navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
