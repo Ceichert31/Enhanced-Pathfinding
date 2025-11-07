@@ -11,7 +11,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
     private const float DEFAULT_MOVEMENT_COST = 1f;
 
-    private WeightedPosition currentPoint;
+    private Vector3 currentPosition;
     private void Start()
     {
         navmesh = GetComponent<NavmeshGeneration>();
@@ -24,6 +24,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         PriorityQueue<WeightedPosition, float> frontier = new();
         HashSet<Vector2> frontierSet = new();
         HashSet<Vector2> visited = new();
+
+        currentPosition = Vector3.positiveInfinity;
 
         //Exit early if target is unreachable
         if (ValidatePosition(target, ref visited, ref frontierSet) == null)
@@ -42,7 +44,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         //While frontier has elements
         while (frontier.Count > 0)
         {
-            currentPoint = frontier.Dequeue();
+            var currentPoint = frontier.Dequeue();
+            currentPosition = currentPoint.Position;
             visited.Add(currentPoint.Position);
 
             //If current point is end point
@@ -164,9 +167,9 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             if (visited.Contains(neighbor))
                 return null;
 
-            if (currentPoint != null) 
+            if (!currentPosition.Equals(Vector3.positiveInfinity)) 
             {
-                if (!navmesh.CheckForConnection(currentPoint.Position, neighbor))
+                if (!navmesh.CheckForConnection(currentPosition, neighbor))
                     return null;
             }
 
