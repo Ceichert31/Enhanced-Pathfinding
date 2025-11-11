@@ -277,7 +277,6 @@ public class NavmeshGeneration : MonoBehaviour
     public List<Vector3> TransformPathTo3D(ref List<Vector2> list2D)
     {
         List<Vector3> result = new();
-        float previousHeight = 0f;
 
         Vector2 previousPos = list2D[0];
 
