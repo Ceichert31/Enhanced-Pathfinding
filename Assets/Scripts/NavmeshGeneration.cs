@@ -3,7 +3,11 @@ using UnityEngine;
 
 public class NavmeshGeneration : MonoBehaviour
 {
-    public Dictionary<Vector2, TerrainData> navMeshGrid = new();
+    //Get all mesh renderers in scene
+    //Transform to world space
+    //
+
+    public Dictionary<Vector2, List<TerrainData>> navMeshGrid = new();
 
     [SerializeField]
     private Vector2 minBound;
@@ -84,15 +88,14 @@ public class NavmeshGeneration : MonoBehaviour
                 //Check for obstacle layer
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
                 {
-                    if (hitInfo.collider.gameObject.tag == "obstacle")
+                    if (hitInfo.collider.gameObject.CompareTag("obstacle"))
                     {
-                        //Add a negative weight for an impassible object
-                        navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
+                        AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
                     }
 
                     //Set cost as the height of the point of contact
-                    navMeshGrid.Add(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
+                    AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
                 }
                 previousKey = key;
             }
@@ -105,12 +108,36 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 Vector2 key = new(i, j);
 
-                AddConnections(key, navMeshGrid[key].Position.y);
+                foreach (var point in navMeshGrid[key])
+                {
+                    AddConnections(key, point.Position.y);
+                }
             }
         }
 
         //Add debug visuals
         EnableDebugMode();
+    }
+
+    /// <summary>
+    /// Adds new terrain data to the navmesh hashmap
+    /// </summary>
+    /// <param name="key">The 2D position</param>
+    /// <param name="data">The terrain data at this position</param>
+    private void AddToNavmesh(Vector2 key, TerrainData data)
+    {
+        //Get list of data to add to end of
+        if (navMeshGrid.TryGetValue(key, out List<TerrainData> list))
+        {
+            list.Add(data);
+        }
+        //Otherwise, add new list of data
+        else
+        {
+            List<TerrainData> newData = new();
+            newData.Add(data);
+            navMeshGrid.Add(key, newData);
+        }
     }
 
     /// <summary>
@@ -131,16 +158,28 @@ public class NavmeshGeneration : MonoBehaviour
 
                 //Check difference in heights, if the difference is too great,
                 //then the AI can't path find
-                if (navMeshGrid.TryGetValue(neighborKey, out TerrainData data))
+                if (navMeshGrid.TryGetValue(neighborKey, out List<TerrainData> data))
                 {
-                    float heightDifference = Mathf.Abs(data.Position.y - hitPointHeight);
-                    AddPointToHashSet(key, neighborKey, heightDifference);
-                    AddPointToHashSet(neighborKey, key, heightDifference);
+                    foreach (var point in data)
+                    {
+                        float heightDifference = Mathf.Abs(point.Position.y - hitPointHeight);
+
+                        //Add twice for two-way path
+                        AddPointToHashSet(key, neighborKey, heightDifference);
+                        AddPointToHashSet(neighborKey, key, heightDifference);
+                    }
                 }
             }
         }
     }
 
+    /// <summary>
+    /// Checks the height difference of two points
+    /// and creates a connection between them
+    /// </summary>
+    /// <param name="key">The 2D position</param>
+    /// <param name="neighborKey">The neighbors 2D position</param>
+    /// <param name="heightDifference">The difference in height between neighbor and current point</param>
     private void AddPointToHashSet(Vector2 key, Vector2 neighborKey, float heightDifference)
     {
         if (heightDifference < MAX_HEIGHT_DIFFERENCE)
@@ -176,15 +215,18 @@ public class NavmeshGeneration : MonoBehaviour
                 {
                     Vector2 key = new(i, j);
 
-                    if (navMeshGrid.TryGetValue(key, out TerrainData data))
+                    if (navMeshGrid.TryGetValue(key, out List<TerrainData> data))
                     {
-                        if (!data.IsWalkable)
+                        foreach(var point in data)
                         {
-                            continue;
-                        }
+                            if (!point.IsWalkable)
+                            {
+                                continue;
+                            }
 
-                        //Add debug object
-                        debugGrid.Add(key, Instantiate(debugPrefab, data.Position, Quaternion.identity, debugParent));
+                            //Add debug object
+                            debugGrid.Add(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
+                        }
                     }
                 }
             }
@@ -235,16 +277,63 @@ public class NavmeshGeneration : MonoBehaviour
     public List<Vector3> TransformPathTo3D(ref List<Vector2> list2D)
     {
         List<Vector3> result = new();
-        foreach (var item in list2D)
+        float previousHeight = 0f;
+
+        Vector2 previousPos = list2D[0];
+
+        //Iterate through 2D path and convert it to 3D worldspace coords
+        for (int i = 0; i < list2D.Count; ++i)
         {
-            if (navMeshGrid.TryGetValue(item, out TerrainData data))
+            Vector2 key = list2D[i];
+         
+            //Try to get the terrain data at this point
+            if (navMeshGrid.TryGetValue(key, out List<TerrainData> data))
             {
-                result.Add(data.Position);
+                TerrainData connectedRoute = null;
+
+                //Compare to find smallest height difference
+                foreach (var point in data)
+                {
+                    if (CheckForConnection(key, previousPos))
+                    {
+                        connectedRoute = point;
+                    }
+                }
+
+                if (connectedRoute == null)
+                    continue;
+
+                previousPos = key;
+
+                //Add cheapest 
+                result.Add(connectedRoute.Position);
                 continue;
             }
             return result;
         }
         return result;
+    }
+
+    /// <summary>
+    /// Return the point with a connection
+    /// </summary>
+    /// <param name="key"></param>
+    public TerrainData? GetNavmeshValue(Vector2 key)
+    {
+        if (navMeshGrid.TryGetValue(key, out List<TerrainData> terrainDataAtThisPoint))
+        {
+            //Check all data points for connection, return first connection
+
+            foreach (var point in terrainDataAtThisPoint)
+            {
+                Vector2 pointKey = new Vector2(point.Position.x, point.Position.z);
+                if (CheckForConnection(key, pointKey))
+                {
+                    return point;
+                }
+            }
+        }
+        return null;
     }
 
     /// <summary>
@@ -273,18 +362,26 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 Vector2 key = new(i, j);
 
-                if (!navMeshGrid.TryGetValue(key, out TerrainData data))
+                if (!navMeshGrid.TryGetValue(key, out List<TerrainData> data))
                     continue;
 
-                if (Vector3.Distance(Camera.main.transform.position, data.Position) > 8)
-                    continue;
-
-                if (hasConnection.TryGetValue(key, out HashSet<Vector2> connections))
+                foreach (var point in data)
                 {
-                    foreach (var connection in connections)
+                    if (Vector3.Distance(Camera.main.transform.position, point.Position) > 8)
+                        continue;
+
+                    if (hasConnection.TryGetValue(key, out HashSet<Vector2> connections))
                     {
-                        if (navMeshGrid.TryGetValue(connection, out TerrainData connectionData))
-                            Debug.DrawLine(data.Position, connectionData.Position, Color.red);
+                        foreach (var connection in connections)
+                        {
+                            if (navMeshGrid.TryGetValue(connection, out List<TerrainData> connectionData))
+                            {
+                                foreach (var x in connectionData)
+                                {
+                                    Debug.DrawLine(point.Position, x.Position, Color.red);
+                                }
+                            }
+                        }
                     }
                 }
             }

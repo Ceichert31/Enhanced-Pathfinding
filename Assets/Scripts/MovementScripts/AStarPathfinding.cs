@@ -155,30 +155,31 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     /// <returns>A weighted position if valid, otherwise null</returns>
     private WeightedPosition ValidatePosition(Vector2 neighbor, ref HashSet<Vector2> visited, ref HashSet<Vector2> frontierSet)
     {
-        //Get navmesh data and check is the neighbor is valid
-        if (navmesh.navMeshGrid.TryGetValue(neighbor, out TerrainData data))
+        //Get the terrain data from navmesh
+        var point = navmesh.GetNavmeshValue(neighbor);
+
+        if (point == null)
+            return null;
+
+        if (!point.IsWalkable)
+            return null;
+
+        if (frontierSet.Contains(neighbor))
+            return null;
+
+        if (visited.Contains(neighbor))
+            return null;
+
+        if (!currentPosition.Equals(Vector3.positiveInfinity))
         {
-            if (!data.IsWalkable)
+            if (!navmesh.CheckForConnection(currentPosition, neighbor))
                 return null;
-
-            if (frontierSet.Contains(neighbor))
-                return null;
-
-            if (visited.Contains(neighbor))
-                return null;
-
-            if (!currentPosition.Equals(Vector3.positiveInfinity)) 
-            {
-                if (!navmesh.CheckForConnection(currentPosition, neighbor))
-                    return null;
-            }
-
-            if (!IsInBounds(neighbor))
-                return null;
-
-            return new WeightedPosition(data.MovementCost, new(data.Position.x, data.Position.z));
         }
-        return null;
+
+        if (!IsInBounds(neighbor))
+            return null;
+
+        return new WeightedPosition(point.MovementCost, new(point.Position.x, point.Position.z));
     }
 
     private bool IsInBounds(Vector2 pos)
