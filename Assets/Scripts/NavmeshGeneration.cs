@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class NavmeshGeneration : MonoBehaviour
 {
@@ -44,7 +43,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Transform obstacleParent;
 
     private Dictionary<Vector2, GameObject> debugGrid = new();
-    private Dictionary<Vector2, HashSet<Vector2>> hasConnection = new();
+    private Dictionary<Vector2, List<Vector2>> hasConnection = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
     private const float MAX_HEIGHT_DIFFERENCE = 1f;
@@ -80,8 +79,6 @@ public class NavmeshGeneration : MonoBehaviour
         navMeshGrid.Clear();
         hasConnection.Clear();
 
-        Vector2 previousKey = new(0,0);
-
         //Ray-cast and generate navmesh
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
         {
@@ -102,7 +99,6 @@ public class NavmeshGeneration : MonoBehaviour
                     AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
                     RecursiveCast(hitInfo.point, raycastLevels, key);
                 }
-                previousKey = key;
             }
         }
 
@@ -113,9 +109,12 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 Vector2 key = new(i, j);
 
-                foreach (var point in navMeshGrid[key])
+                if (navMeshGrid.TryGetValue(key, out List<TerrainData> dataList))
                 {
-                    AddConnections(key, point.Position.y);
+                    foreach (var point in dataList)
+                    {
+                        AddConnections(key, point.Position.y);
+                    }
                 }
             }
         }
@@ -180,17 +179,15 @@ public class NavmeshGeneration : MonoBehaviour
 
                 //Check difference in heights, if the difference is too great,
                 //then the AI can't path find
-                if (navMeshGrid.TryGetValue(neighborKey, out List<TerrainData> data))
-                {
-                    foreach (var point in data)
-                    {
-                        float heightDifference = Mathf.Abs(point.Position.y - hitPointHeight);
+                var point = GetNavmeshValue(neighborKey);
 
-                        //Add twice for two-way path
-                        AddPointToHashSet(key, neighborKey, heightDifference);
-                        AddPointToHashSet(neighborKey, key, heightDifference);
-                    }
-                }
+                if (point == null) continue;
+
+                float heightDifference = Mathf.Abs(point.Position.y - hitPointHeight);
+
+                //Add twice for two-way path
+                AddPointToHashSet(key, neighborKey, heightDifference);
+                AddPointToHashSet(neighborKey, key, heightDifference);
             }
         }
     }
@@ -204,22 +201,24 @@ public class NavmeshGeneration : MonoBehaviour
     /// <param name="heightDifference">The difference in height between neighbor and current point</param>
     private void AddPointToHashSet(Vector2 key, Vector2 neighborKey, float heightDifference)
     {
+        if (key == neighborKey) return;
+
         if (heightDifference < MAX_HEIGHT_DIFFERENCE)
         {
             //Access hash set if it already has one
             if (hasConnection.ContainsKey(key))
             {
-                if (hasConnection.TryGetValue(key, out HashSet<Vector2> set))
+                if (hasConnection.TryGetValue(key, out List<Vector2> connectionsList))
                 {
-                    set.Add(neighborKey);
+                    connectionsList.Add(neighborKey);
                 }
             }
             //Otherwise create new hash set and insert it
             else
             {
-                var set = new HashSet<Vector2>();
-                set.Add(neighborKey);
-                hasConnection.TryAdd(key, set);
+                var connectionsList = new List<Vector2>();
+                connectionsList.Add(neighborKey);
+                hasConnection.TryAdd(key, connectionsList);
             }
         }
     }
@@ -237,19 +236,16 @@ public class NavmeshGeneration : MonoBehaviour
                 {
                     Vector2 key = new(i, j);
 
-                    if (navMeshGrid.TryGetValue(key, out List<TerrainData> data))
-                    {
-                        foreach(var point in data)
-                        {
-                            if (!point.IsWalkable)
-                            {
-                                continue;
-                            }
+                    var point = GetNavmeshValue(key);
 
-                            //Add debug object
-                            debugGrid.TryAdd(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
-                        }
+                    if (point == null) continue;
+
+                    if (!point.IsWalkable)
+                    {
+                        continue;
                     }
+
+                    debugGrid.TryAdd(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
                 }
             }
         }
@@ -367,9 +363,9 @@ public class NavmeshGeneration : MonoBehaviour
     {
         if (currentPos == neighborPos) return true;
 
-        if (hasConnection.TryGetValue(currentPos, out HashSet<Vector2> set))
+        if (hasConnection.TryGetValue(currentPos, out List<Vector2> connectionsList))
         {
-            if (set.Contains(neighborPos))
+            if (connectionsList.Contains(neighborPos))
             {
                 return true;
             }
@@ -393,7 +389,7 @@ public class NavmeshGeneration : MonoBehaviour
                     if (Vector3.Distance(Camera.main.transform.position, point.Position) > 8)
                         continue;
 
-                    if (hasConnection.TryGetValue(key, out HashSet<Vector2> connections))
+                    if (hasConnection.TryGetValue(key, out List<Vector2> connections))
                     {
                         foreach (var connection in connections)
                         {
