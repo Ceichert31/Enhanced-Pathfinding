@@ -317,7 +317,7 @@ public class NavmeshGeneration : MonoBehaviour
     /// Return the point with a connection
     /// </summary>
     /// <param name="key"></param>
-    public TerrainData? GetNavmeshValue(Vector2 key)
+    public TerrainData GetNavmeshValue(Vector2 key)
     {
         if (navMeshGrid.TryGetValue(key, out List<TerrainData> terrainDataAtThisPoint))
         {
@@ -343,6 +343,8 @@ public class NavmeshGeneration : MonoBehaviour
     /// <returns>Whether the agent can traverse here</returns>
     public bool CheckForConnection(Vector2 currentPos, Vector2 neighborPos)
     {
+        if (currentPos == neighborPos) return true;
+
         if (hasConnection.TryGetValue(currentPos, out HashSet<Vector2> set))
         {
             if (set.Contains(neighborPos))
