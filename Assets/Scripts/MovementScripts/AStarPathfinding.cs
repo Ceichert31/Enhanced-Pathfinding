@@ -25,8 +25,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         HashSet<Vector3> frontierSet = new();
         HashSet<Vector3> visited = new();
 
-        currentPosition = Vector3.positiveInfinity;
-
         //Exit early if target is unreachable
         if (ValidatePosition(target, ref visited, ref frontierSet) == null)
         {
@@ -50,7 +48,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
             //If current point is end point
             //(Use vector3.distance to account for any floating point errors)
-            if (Vector3.Distance(currentPoint.Position, target) < 0.1f)
+            if (currentPoint.Position == target)
             {
                 endPoint = currentPoint;
                 break;
@@ -130,9 +128,13 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
         //Ask navmesh what current points we can reach
         var terrainData = navmesh.GetNavmeshValue(new(pos.x, pos.z), pos.y);
-        foreach (var neighbor in terrainData.GetConnections())
+        foreach (Vector2 neighbor in terrainData.GetConnections())
         {
-            var position = ValidatePosition(neighbor, ref visited, ref frontierSet);
+            TerrainData neighbor3D = navmesh.GetNavmeshValue(neighbor, pos.y);
+            if (neighbor3D == null)
+                continue;
+
+            var position = ValidatePosition(neighbor3D.Position, ref visited, ref frontierSet);
             if (position != null)
             {
                 neighbors.Add(position);
@@ -163,12 +165,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
         if (visited.Contains(neighbor))
             return null;
-
-        if (!currentPosition.Equals(Vector3.positiveInfinity))
-        {
-            if (!navmesh.CheckForConnection(new(currentPosition.x,currentPosition.z), neighborKey, neighbor.y))
-                return null;
-        }
 
         if (!IsInBounds(neighbor))
             return null;
