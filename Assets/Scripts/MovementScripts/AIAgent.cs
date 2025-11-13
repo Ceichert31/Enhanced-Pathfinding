@@ -71,7 +71,7 @@ public class AIAgent : MonoBehaviour
     private void Update()
     {
         //Get path to target
-        var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)));
+        var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)), target.position.y);
 
         if (path == null || path.Count <= 1)
         {
@@ -113,5 +113,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    List<Vector3> GetPath(Vector2 startPos, Vector2 target);
+    List<Vector3> GetPath(Vector2 startPos, Vector2 target, float targetY);
 }

@@ -180,7 +180,7 @@ public class NavmeshGeneration : MonoBehaviour
 
                 //Check difference in heights, if the difference is too great,
                 //then the AI can't path find
-                var point = GetNavmeshValue(neighborKey);
+                var point = GetNavmeshValue(neighborKey, hitPointHeight);
 
                 if (point == null) continue;
 
@@ -207,7 +207,7 @@ public class NavmeshGeneration : MonoBehaviour
         if (heightDifference < MAX_HEIGHT_DIFFERENCE)
         {
             //Access hash set if it already has one
-            var point = GetNavmeshValue(key);
+            var point = GetNavmeshValue(key, heightDifference);
             if (point == null) return;
 
             //Add neighbor to connections list
@@ -228,16 +228,20 @@ public class NavmeshGeneration : MonoBehaviour
                 {
                     Vector2 key = new(i, j);
 
-                    var point = GetNavmeshValue(key);
-
-                    if (point == null) continue;
-
-                    if (!point.IsWalkable)
-                    {
+                    if (!navMeshGrid.TryGetValue(key, out var pointList))
                         continue;
-                    }
 
-                    debugGrid.TryAdd(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
+                    foreach (var point in pointList)
+                    {
+                        if (point == null) continue;
+
+                        if (!point.IsWalkable)
+                        {
+                            continue;
+                        }
+
+                        debugGrid.TryAdd(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
+                    }
                 }
             }
         }
@@ -303,7 +307,7 @@ public class NavmeshGeneration : MonoBehaviour
                 //Compare to find smallest height difference
                 foreach (var point in data)
                 {
-                    if (CheckForConnection(key, previousPos))
+                    if (CheckForConnection(key, previousPos, point.Position.y))
                     {
                         connectedRoute = point;
                     }
@@ -327,19 +331,27 @@ public class NavmeshGeneration : MonoBehaviour
     /// Return the point with a connection
     /// </summary>
     /// <param name="key"></param>
-    public TerrainData GetNavmeshValue(Vector2 key)
+    public TerrainData GetNavmeshValue(Vector2 key, float level)
     {
         if (navMeshGrid.TryGetValue(key, out List<TerrainData> terrainDataAtThisPoint))
         {
+            TerrainData closest = null;
+            float distance = Mathf.Infinity;
+
             //Check all data points for connection, return first connection
             foreach (var point in terrainDataAtThisPoint)
             {
-                Vector2 pointKey = new Vector2(point.Position.x, point.Position.z);
-                if (CheckForConnection(key, pointKey))
+                //Calculate difference between level and point's position
+                float currentHeightDifference = Mathf.Abs(level - point.Position.y);
+
+                //If closer to point than previously, set closest 
+                if (currentHeightDifference < distance)
                 {
-                    return point;
+                    distance = currentHeightDifference;
+                    closest = point;
                 }
             }
+            return closest;
         }
         return null;
     }
@@ -350,11 +362,11 @@ public class NavmeshGeneration : MonoBehaviour
     /// <param name="currentPos">The algorithms current position</param>
     /// <param name="neighborPos">The algorithms next position</param>
     /// <returns>Whether the agent can traverse here</returns>
-    public bool CheckForConnection(Vector2 currentPos, Vector2 neighborPos)
+    public bool CheckForConnection(Vector2 currentPos, Vector2 neighborPos, float level)
     {
         if (currentPos == neighborPos) return true;
 
-        var data = GetNavmeshValue(currentPos);
+        var data = GetNavmeshValue(currentPos, level);
 
         if (data == null) return false;
 
@@ -362,6 +374,14 @@ public class NavmeshGeneration : MonoBehaviour
     }
 
     private void Update()
+    {
+        RenderConnections();
+    }
+
+    /// <summary>
+    /// Renders lines between every connection
+    /// </summary>
+    private void RenderConnections()
     {
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
         {

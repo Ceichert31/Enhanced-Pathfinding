@@ -12,18 +12,20 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     private const float DEFAULT_MOVEMENT_COST = 1f;
 
     private Vector3 currentPosition;
+    private float targetY;
     private void Start()
     {
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public List<Vector3> GetPath(Vector2 startPos, Vector2 target)
+    public List<Vector3> GetPath(Vector2 startPos, Vector2 target, float targetY)
     {
         Dictionary<WeightedPosition, float> costSoFar = new();
         Dictionary<Vector2, Vector2> cameFrom = new();
         PriorityQueue<WeightedPosition, float> frontier = new();
         HashSet<Vector2> frontierSet = new();
         HashSet<Vector2> visited = new();
+        this.targetY = targetY;
 
         currentPosition = Vector3.positiveInfinity;
 
@@ -156,7 +158,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     private WeightedPosition ValidatePosition(Vector2 neighbor, ref HashSet<Vector2> visited, ref HashSet<Vector2> frontierSet)
     {
         //Get the terrain data from navmesh
-        var point = navmesh.GetNavmeshValue(neighbor);
+        var point = navmesh.GetNavmeshValue(neighbor, targetY);
 
         if (point == null)
             return null;
@@ -172,7 +174,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
         if (!currentPosition.Equals(Vector3.positiveInfinity))
         {
-            if (!navmesh.CheckForConnection(currentPosition, neighbor))
+            if (!navmesh.CheckForConnection(currentPosition, neighbor, targetY))
                 return null;
         }
 
