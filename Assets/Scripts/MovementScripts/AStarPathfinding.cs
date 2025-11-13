@@ -12,20 +12,18 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     private const float DEFAULT_MOVEMENT_COST = 1f;
 
     private Vector3 currentPosition;
-    private float targetY;
     private void Start()
     {
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public List<Vector3> GetPath(Vector2 startPos, Vector2 target, float targetY)
+    public List<Vector3> GetPath(Vector3 startPos, Vector3 target)
     {
         Dictionary<WeightedPosition, float> costSoFar = new();
-        Dictionary<Vector2, Vector2> cameFrom = new();
+        Dictionary<Vector3, Vector3> cameFrom = new();
         PriorityQueue<WeightedPosition, float> frontier = new();
-        HashSet<Vector2> frontierSet = new();
-        HashSet<Vector2> visited = new();
-        this.targetY = targetY;
+        HashSet<Vector3> frontierSet = new();
+        HashSet<Vector3> visited = new();
 
         currentPosition = Vector3.positiveInfinity;
 
@@ -51,7 +49,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             visited.Add(currentPoint.Position);
 
             //If current point is end point
-            if (currentPoint.Position == target)
+            //(Use vector3.distance to account for any floating point errors)
+            if (Vector3.Distance(currentPoint.Position, target) < 0.1f)
             {
                 endPoint = currentPoint;
                 break;
@@ -89,10 +88,10 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         //Convert from 2D space to 3D space with navmesh
         if (endPoint != null)
         {
-            List<Vector2> path = new();
+            List<Vector3> path = new();
 
             path.Add(endPoint.Position);
-            cameFrom.TryGetValue(endPoint.Position, out Vector2 current);
+            cameFrom.TryGetValue(endPoint.Position, out Vector3 current);
 
             if (current == null)
             {
@@ -112,42 +111,33 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             }
             //Reverse path and convert to 3D
             path.Reverse();
-            return navmesh.TransformPathTo3D(ref path);
+            return path;
         }
 
         return null;
     }
 
-    private List<WeightedPosition> GetVisitableNeighbors(Vector2 pos, ref HashSet<Vector2> visited, ref HashSet<Vector2> frontierSet)
+    /// <summary>
+    /// Iterate through all connections to a point on the navmesh, check if they are valid
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="visited"></param>
+    /// <param name="frontierSet"></param>
+    /// <returns></returns>
+    private List<WeightedPosition> GetVisitableNeighbors(Vector3 pos, ref HashSet<Vector3> visited, ref HashSet<Vector3> frontierSet)
     {
         List<WeightedPosition> neighbors = new();
 
-        Vector2 northPos = new(pos.x+1, pos.y);
-        Vector2 eastPos = new(pos.x-1, pos.y);
-        Vector2 southPos = new(pos.x, pos.y+1);
-        Vector2 westPos = new(pos.x, pos.y-1);
-
-        var position = ValidatePosition(northPos, ref visited, ref frontierSet);
-        if (position != null)
+        //Ask navmesh what current points we can reach
+        var terrainData = navmesh.GetNavmeshValue(new(pos.x, pos.z), pos.y);
+        foreach (var neighbor in terrainData.GetConnections())
         {
-            neighbors.Add(position);
+            var position = ValidatePosition(neighbor, ref visited, ref frontierSet);
+            if (position != null)
+            {
+                neighbors.Add(position);
+            }
         }
-        position = ValidatePosition(eastPos, ref visited, ref frontierSet);
-        if (position != null)
-        {
-            neighbors.Add(position);
-        }
-        position = ValidatePosition(southPos, ref visited, ref frontierSet);
-        if (position != null)
-        {
-            neighbors.Add(position);
-        }
-        position = ValidatePosition(westPos, ref visited, ref frontierSet);
-        if (position != null)
-        {
-            neighbors.Add(position);
-        }
-
         return neighbors;
     }
     /// <summary>
@@ -155,10 +145,12 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     /// </summary>
     /// <param name="neighbor"></param>
     /// <returns>A weighted position if valid, otherwise null</returns>
-    private WeightedPosition ValidatePosition(Vector2 neighbor, ref HashSet<Vector2> visited, ref HashSet<Vector2> frontierSet)
+    private WeightedPosition ValidatePosition(Vector3 neighbor, ref HashSet<Vector3> visited, ref HashSet<Vector3> frontierSet)
     {
+        Vector2 neighborKey = new(neighbor.x, neighbor.z);
+
         //Get the terrain data from navmesh
-        var point = navmesh.GetNavmeshValue(neighbor, targetY);
+        var point = navmesh.GetNavmeshValue(neighborKey, neighbor.y);
 
         if (point == null)
             return null;
@@ -174,38 +166,38 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
         if (!currentPosition.Equals(Vector3.positiveInfinity))
         {
-            if (!navmesh.CheckForConnection(currentPosition, neighbor, targetY))
+            if (!navmesh.CheckForConnection(new(currentPosition.x,currentPosition.z), neighborKey, neighbor.y))
                 return null;
         }
 
         if (!IsInBounds(neighbor))
             return null;
 
-        return new WeightedPosition(point.MovementCost, new(point.Position.x, point.Position.z));
+        return new WeightedPosition(point.MovementCost, neighbor);
     }
 
-    private bool IsInBounds(Vector2 pos)
+    private bool IsInBounds(Vector3 pos)
     {
-        if (pos.x > navmesh.MinimumBoundary.x && pos.y > navmesh.MinimumBoundary.y
-            && pos.x < navmesh.MaximumBoundary.x && pos.y < navmesh.MaximumBoundary.y)
+        if (pos.x > navmesh.MinimumBoundary.x && pos.z > navmesh.MinimumBoundary.y
+            && pos.x < navmesh.MaximumBoundary.x && pos.z < navmesh.MaximumBoundary.y)
             return true;
         return false;
     }
 
-    public float Heuristic(Vector2 start, Vector2 end)
+    public float Heuristic(Vector3 start, Vector3 end)
     {
-        return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.y - end.y);
+        return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.z - end.z);
     }
 }
 
 public class WeightedPosition
 {
-    public WeightedPosition(float weight, Vector2 pos)
+    public WeightedPosition(float weight, Vector3 pos)
     {
         Weight = weight;
         Position = pos;
     }
 
     public float Weight;
-    public Vector2 Position;
+    public Vector3 Position;
 }

@@ -188,7 +188,7 @@ public class NavmeshGeneration : MonoBehaviour
 
                 //Add twice for two-way path
                 AddPointToHashSet(key, neighborKey, heightDifference);
-                AddPointToHashSet(neighborKey, key, heightDifference);
+                //AddPointToHashSet(neighborKey, key, heightDifference);
             }
         }
     }
@@ -282,49 +282,6 @@ public class NavmeshGeneration : MonoBehaviour
             Destroy(obstacleParent.GetChild(i).gameObject);
         }
         GenerateNavMesh();
-    }
-    /// <summary>
-    /// Generate a 3-Dimensional path from a list of 2D coordinates
-    /// </summary>
-    /// <param name="list2D"></param>
-    /// <returns>A 3D path</returns>
-    public List<Vector3> TransformPathTo3D(ref List<Vector2> list2D)
-    {
-        List<Vector3> result = new();
-
-        Vector2 previousPos = list2D[0];
-
-        //Iterate through 2D path and convert it to 3D worldspace coords
-        for (int i = 0; i < list2D.Count; ++i)
-        {
-            Vector2 key = list2D[i];
-         
-            //Try to get the terrain data at this point
-            if (navMeshGrid.TryGetValue(key, out List<TerrainData> data))
-            {
-                TerrainData connectedRoute = null;
-
-                //Compare to find smallest height difference
-                foreach (var point in data)
-                {
-                    if (CheckForConnection(key, previousPos, point.Position.y))
-                    {
-                        connectedRoute = point;
-                    }
-                }
-
-                if (connectedRoute == null)
-                    continue;
-
-                previousPos = key;
-
-                //Add cheapest 
-                result.Add(connectedRoute.Position);
-                continue;
-            }
-            return result;
-        }
-        return result;
     }
 
     /// <summary>
@@ -431,14 +388,14 @@ public class TerrainData
     public float MovementCost;
     public bool IsWalkable;
 
-    private List<Vector2> Connections = new();
+    private HashSet<Vector2> Connections = new();
 
     public bool ContainsKey(Vector2 key)
     {
         return Connections.Contains(key);
     } 
 
-    public ref List<Vector2> GetConnections()
+    public ref HashSet<Vector2> GetConnections()
     {
         return ref Connections;
     }
