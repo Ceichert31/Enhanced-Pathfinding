@@ -247,7 +247,7 @@ public class NavmeshGeneration : MonoBehaviour
                             }
 
                             //Add debug object
-                            debugGrid.Add(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
+                            debugGrid.TryAdd(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
                         }
                     }
                 }
