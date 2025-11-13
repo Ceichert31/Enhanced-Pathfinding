@@ -43,7 +43,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Transform obstacleParent;
 
     private Dictionary<Vector2, GameObject> debugGrid = new();
-    private Dictionary<Vector2, List<Vector2>> hasConnection = new();
+    //private Dictionary<TerrainData, List<Vector2>> hasConnection = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
     private const float MAX_HEIGHT_DIFFERENCE = 1f;
@@ -77,7 +77,6 @@ public class NavmeshGeneration : MonoBehaviour
         //Clear old navmesh
         debugGrid.Clear();
         navMeshGrid.Clear();
-        hasConnection.Clear();
 
         //Ray-cast and generate navmesh
         for (int i = (int)minBound.x; i < maxBound.x; ++i)
@@ -134,6 +133,9 @@ public class NavmeshGeneration : MonoBehaviour
 
         if (Physics.Raycast(castOrigin, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
         {
+            if (Mathf.Abs(castOrigin.y - hitInfo.point.y) < MAX_HEIGHT_DIFFERENCE)
+                return;
+
             //Set cost as the height of the point of contact
             AddToNavmesh(key, new TerrainData(new(key.x, hitInfo.point.y, key.y), hitInfo.point.y, true));
             RecursiveCast(hitInfo.point, --castsLeft, key);
@@ -206,9 +208,11 @@ public class NavmeshGeneration : MonoBehaviour
         if (heightDifference < MAX_HEIGHT_DIFFERENCE)
         {
             //Access hash set if it already has one
-            if (hasConnection.ContainsKey(key))
+            var point = GetNavmeshValue(key);
+            if (point == null) return;
+            if (hasConnection.ContainsKey(point))
             {
-                if (hasConnection.TryGetValue(key, out List<Vector2> connectionsList))
+                if (hasConnection.TryGetValue(point, out List<Vector2> connectionsList))
                 {
                     connectionsList.Add(neighborKey);
                 }
@@ -218,7 +222,7 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 var connectionsList = new List<Vector2>();
                 connectionsList.Add(neighborKey);
-                hasConnection.TryAdd(key, connectionsList);
+                hasConnection.TryAdd(point, connectionsList);
             }
         }
     }
@@ -340,7 +344,6 @@ public class NavmeshGeneration : MonoBehaviour
         if (navMeshGrid.TryGetValue(key, out List<TerrainData> terrainDataAtThisPoint))
         {
             //Check all data points for connection, return first connection
-
             foreach (var point in terrainDataAtThisPoint)
             {
                 Vector2 pointKey = new Vector2(point.Position.x, point.Position.z);
@@ -363,7 +366,11 @@ public class NavmeshGeneration : MonoBehaviour
     {
         if (currentPos == neighborPos) return true;
 
-        if (hasConnection.TryGetValue(currentPos, out List<Vector2> connectionsList))
+        var data = GetNavmeshValue(currentPos);
+
+        if (data == null) return false;
+
+        if (hasConnection.TryGetValue(data, out List<Vector2> connectionsList))
         {
             if (connectionsList.Contains(neighborPos))
             {
@@ -389,7 +396,7 @@ public class NavmeshGeneration : MonoBehaviour
                     if (Vector3.Distance(Camera.main.transform.position, point.Position) > 8)
                         continue;
 
-                    if (hasConnection.TryGetValue(key, out List<Vector2> connections))
+                    if (hasConnection.TryGetValue(point, out List<Vector2> connections))
                     {
                         foreach (var connection in connections)
                         {
@@ -420,4 +427,6 @@ public class TerrainData
     public Vector3 Position;
     public float MovementCost;
     public bool IsWalkable;
+
+    private List<Vector2> Connections = new();
 }
