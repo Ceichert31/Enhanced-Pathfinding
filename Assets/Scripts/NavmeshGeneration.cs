@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class NavmeshGeneration : MonoBehaviour
 {
@@ -27,6 +28,9 @@ public class NavmeshGeneration : MonoBehaviour
     [Range(3f, 5f)]
     [SerializeField]
     private int debugResolution = 5;
+    [Range(1, 5)]
+    [SerializeField]
+    private int raycastLevels = 3;
 
     [SerializeField]
     private GameObject debugPrefab;
@@ -96,6 +100,7 @@ public class NavmeshGeneration : MonoBehaviour
 
                     //Set cost as the height of the point of contact
                     AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
+                    RecursiveCast(hitInfo.point, raycastLevels, key);
                 }
                 previousKey = key;
             }
@@ -117,6 +122,23 @@ public class NavmeshGeneration : MonoBehaviour
 
         //Add debug visuals
         EnableDebugMode();
+    }
+
+    /// <summary>
+    /// Shoots a raycast down from a previous raycast's hitpoint recursively
+    /// </summary>
+    /// <param name="castOrigin">Where the last cast hit something</param>
+    private void RecursiveCast(Vector3 castOrigin, int castsLeft, Vector2 key)
+    {
+        if (castsLeft < 0)
+            return;
+
+        if (Physics.Raycast(castOrigin, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
+        {
+            //Set cost as the height of the point of contact
+            AddToNavmesh(key, new TerrainData(new(key.x, hitInfo.point.y, key.y), hitInfo.point.y, true));
+            RecursiveCast(hitInfo.point, --castsLeft, key);
+        }
     }
 
     /// <summary>
