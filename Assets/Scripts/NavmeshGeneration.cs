@@ -43,7 +43,6 @@ public class NavmeshGeneration : MonoBehaviour
     private Transform obstacleParent;
 
     private Dictionary<Vector2, GameObject> debugGrid = new();
-    //private Dictionary<TerrainData, List<Vector2>> hasConnection = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
     private const float MAX_HEIGHT_DIFFERENCE = 1f;
@@ -210,20 +209,9 @@ public class NavmeshGeneration : MonoBehaviour
             //Access hash set if it already has one
             var point = GetNavmeshValue(key);
             if (point == null) return;
-            if (hasConnection.ContainsKey(point))
-            {
-                if (hasConnection.TryGetValue(point, out List<Vector2> connectionsList))
-                {
-                    connectionsList.Add(neighborKey);
-                }
-            }
-            //Otherwise create new hash set and insert it
-            else
-            {
-                var connectionsList = new List<Vector2>();
-                connectionsList.Add(neighborKey);
-                hasConnection.TryAdd(point, connectionsList);
-            }
+
+            //Add neighbor to connections list
+            point.GetConnections().Add(neighborKey);
         }
     }
 
@@ -370,14 +358,7 @@ public class NavmeshGeneration : MonoBehaviour
 
         if (data == null) return false;
 
-        if (hasConnection.TryGetValue(data, out List<Vector2> connectionsList))
-        {
-            if (connectionsList.Contains(neighborPos))
-            {
-                return true;
-            }
-        }
-        return false;
+        return data.ContainsKey(neighborPos);
     }
 
     private void Update()
@@ -396,16 +377,15 @@ public class NavmeshGeneration : MonoBehaviour
                     if (Vector3.Distance(Camera.main.transform.position, point.Position) > 8)
                         continue;
 
-                    if (hasConnection.TryGetValue(point, out List<Vector2> connections))
+                    var connectionList = point.GetConnections();
+
+                    foreach (var connection in connectionList)
                     {
-                        foreach (var connection in connections)
+                        if (navMeshGrid.TryGetValue(connection, out List<TerrainData> connectionData))
                         {
-                            if (navMeshGrid.TryGetValue(connection, out List<TerrainData> connectionData))
+                            foreach (var x in connectionData)
                             {
-                                foreach (var x in connectionData)
-                                {
-                                    Debug.DrawLine(point.Position, x.Position, Color.red);
-                                }
+                                Debug.DrawLine(point.Position, x.Position, Color.red);
                             }
                         }
                     }
@@ -415,6 +395,9 @@ public class NavmeshGeneration : MonoBehaviour
     }
 }
 
+/// <summary>
+/// Holds data relating to navmesh 
+/// </summary>
 public class TerrainData
 {
     public TerrainData(Vector3 pos, float cost, bool walkable)
@@ -429,4 +412,14 @@ public class TerrainData
     public bool IsWalkable;
 
     private List<Vector2> Connections = new();
+
+    public bool ContainsKey(Vector2 key)
+    {
+        return Connections.Contains(key);
+    } 
+
+    public ref List<Vector2> GetConnections()
+    {
+        return ref Connections;
+    }
 }
