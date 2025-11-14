@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class NavmeshGeneration : MonoBehaviour
 {
@@ -204,7 +206,7 @@ public class NavmeshGeneration : MonoBehaviour
     {
         if (key == neighborKey) return;
 
-        if (heightDifference < MAX_HEIGHT_DIFFERENCE)
+        if (heightDifference < 2f)
         {
             //Access hash set if it already has one
             var point = GetNavmeshValue(key, height);
@@ -355,16 +357,11 @@ public class NavmeshGeneration : MonoBehaviour
                         continue;
 
                     var connectionList = point.GetConnections();
-
+                   
                     foreach (var connection in connectionList)
                     {
-                        if (navMeshGrid.TryGetValue(connection, out List<TerrainData> connectionData))
-                        {
-                            foreach (var x in connectionData)
-                            {
-                                Debug.DrawLine(point.Position, x.Position, Color.red);
-                            }
-                        }
+                        var closestPoint = GetNavmeshValue(connection, point.Position.y);
+                        Debug.DrawLine(point.Position, closestPoint.Position, Color.red);
                     }
                 }
             }
@@ -375,20 +372,22 @@ public class NavmeshGeneration : MonoBehaviour
 /// <summary>
 /// Holds data relating to navmesh 
 /// </summary>
-public class TerrainData
+public class TerrainData : IEquatable<TerrainData>
 {
     public TerrainData(Vector3 pos, float cost, bool walkable)
     {
         Position = pos;
         MovementCost = cost;
         IsWalkable = walkable;
+        Connections = new();
+        Connections.Add(new Vector2(pos.x, pos.z));
     }
 
     public Vector3 Position;
     public float MovementCost;
     public bool IsWalkable;
 
-    private HashSet<Vector2> Connections = new();
+    private HashSet<Vector2> Connections;
 
     public bool ContainsKey(Vector2 key)
     {
@@ -398,5 +397,10 @@ public class TerrainData
     public ref HashSet<Vector2> GetConnections()
     {
         return ref Connections;
+    }
+
+    public bool Equals(TerrainData other)
+    {
+        return Position == other.Position;
     }
 }
