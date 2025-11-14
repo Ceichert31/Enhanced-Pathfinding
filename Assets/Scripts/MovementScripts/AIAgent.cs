@@ -40,14 +40,20 @@ public class AIAgent : MonoBehaviour
     [SerializeField]
     private bool enableDebug;
 
+    [SerializeField]
+    private float recalculatePathDistance = 2f;
+
     private IPathfinder pathfindingAlgorithm;
     private PathSmoothing pathSmoothingAlgorithm;
 
     private LineRenderer lineRenderer;
 
+    private Vector3 lastTargetPos;
+    private List<Vector3> path = new();
+
     private const float CAPSULE_OFFSET = 1f;
     private const float DEBUG_LINE_OFFSET = 0.5f;
-    private void Awake()
+    private void Start()
     {
         if (!transform.TryGetComponent(out pathfindingAlgorithm))
         {
@@ -58,6 +64,10 @@ public class AIAgent : MonoBehaviour
             throw new NullReferenceException("Please add a path smoothing algorithm to the AI Agent!");
         }
         lineRenderer = GetComponent<LineRenderer>();
+
+        lastTargetPos = target.position;
+
+        path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
     }
 
     /// <summary>
@@ -70,8 +80,12 @@ public class AIAgent : MonoBehaviour
 
     private void Update()
     {
-        //Get path to target
-        var path = pathfindingAlgorithm.GetPath(RoundVector(new(transform.position.x, transform.position.z)), RoundVector(new(target.position.x, target.position.z)));
+        if (Vector3.Distance(lastTargetPos, target.position) > recalculatePathDistance)
+        {
+            //Get path to target
+            path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
+            lastTargetPos = transform.position;
+        }
 
         if (path == null || path.Count <= 1)
         {
@@ -101,11 +115,12 @@ public class AIAgent : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
-    private Vector3 RoundVector(Vector2 vector)
+    private Vector3 RoundVector(Vector3 vector)
     {
-        return new Vector2(
+        return new Vector3(
             Mathf.RoundToInt(vector.x),
-            Mathf.RoundToInt(vector.y)
+            vector.y,
+            Mathf.RoundToInt(vector.z)
             );
     }
 
@@ -113,5 +128,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    List<Vector3> GetPath(Vector2 startPos, Vector2 target);
+    List<Vector3> GetPath(Vector3 startPos, Vector3 target);
 }
