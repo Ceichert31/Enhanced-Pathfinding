@@ -48,7 +48,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
             //If current point is end point
             //(Use vector3.distance to account for any floating point errors)
-            if (currentPoint.Position == target)
+            if (new Vector2(currentPoint.Position.x, currentPoint.Position.z) == new Vector2(target.x,target.z))
             {
                 endPoint = currentPoint;
                 break;

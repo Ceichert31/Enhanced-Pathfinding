@@ -187,7 +187,7 @@ public class NavmeshGeneration : MonoBehaviour
                 float heightDifference = Mathf.Abs(point.Position.y - hitPointHeight);
 
                 //Add twice for two-way path
-                AddPointToHashSet(key, neighborKey, heightDifference);
+                AddPointToHashSet(key, neighborKey, heightDifference, hitPointHeight);
                 //AddPointToHashSet(neighborKey, key, heightDifference);
             }
         }
@@ -200,14 +200,14 @@ public class NavmeshGeneration : MonoBehaviour
     /// <param name="key">The 2D position</param>
     /// <param name="neighborKey">The neighbors 2D position</param>
     /// <param name="heightDifference">The difference in height between neighbor and current point</param>
-    private void AddPointToHashSet(Vector2 key, Vector2 neighborKey, float heightDifference)
+    private void AddPointToHashSet(Vector2 key, Vector2 neighborKey, float heightDifference, float height)
     {
         if (key == neighborKey) return;
 
         if (heightDifference < MAX_HEIGHT_DIFFERENCE)
         {
             //Access hash set if it already has one
-            var point = GetNavmeshValue(key, heightDifference);
+            var point = GetNavmeshValue(key, height);
             if (point == null) return;
 
             //Add neighbor to connections list

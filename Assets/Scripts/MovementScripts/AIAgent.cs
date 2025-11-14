@@ -105,7 +105,7 @@ public class AIAgent : MonoBehaviour
     {
         return new Vector3(
             Mathf.RoundToInt(vector.x),
-            Mathf.RoundToInt(vector.y),
+            vector.y,
             Mathf.RoundToInt(vector.z)
             );
     }
