@@ -47,7 +47,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Dictionary<Vector2, GameObject> debugGrid = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
-    private const float MAX_HEIGHT_DIFFERENCE = 0.8f;
+    private const float MAX_HEIGHT_DIFFERENCE = 0.4f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
@@ -55,8 +55,6 @@ public class NavmeshGeneration : MonoBehaviour
     {
         GenerateNavMesh();
     }
-
-    //Generate edges between nodes, and don't generate edges if there is a big height difference
 
     /// <summary>
     /// Clears and reconstructs the navmesh
@@ -175,6 +173,11 @@ public class NavmeshGeneration : MonoBehaviour
         {
             for (int j = (int)key.y -1; j < (int)key.y + 2; ++j)
             {
+                //Skip adding diagonal neighbors
+                if (i != key.x && j != key.y)
+                    continue;
+
+                //Skip adding self
                 if (i == key.x && j == key.y)
                     continue;
 
@@ -190,7 +193,6 @@ public class NavmeshGeneration : MonoBehaviour
 
                 //Add twice for two-way path
                 AddPointToHashSet(key, neighborKey, heightDifference, hitPointHeight);
-                //AddPointToHashSet(neighborKey, key, heightDifference);
             }
         }
     }

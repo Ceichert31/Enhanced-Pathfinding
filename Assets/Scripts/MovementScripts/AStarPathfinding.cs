@@ -47,7 +47,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             visited.Add(currentPoint.Position);
 
             //If current point is end point
-            //(Use vector3.distance to account for any floating point errors)
             if (new Vector2(currentPoint.Position.x, currentPoint.Position.z) == new Vector2(target.x,target.z))
             {
                 endPoint = currentPoint;
@@ -63,7 +62,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             foreach (var neighbor in neighbors) 
             {
                 //Calculate new cost of travel
-                float newCost = costSoFar[currentPoint] + DEFAULT_MOVEMENT_COST;
+                float newCost = costSoFar[currentPoint] + DEFAULT_MOVEMENT_COST + Mathf.Abs(neighbor.Weight - currentPoint.Position.y);
 
                 //Check if the neighbor exists already in the frontier and if it does, check its old cost
                 if (!frontierSet.Contains(neighbor.Position) || costSoFar[neighbor] > newCost)
@@ -83,7 +82,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         }
 
         //If we find an end point
-        //Convert from 2D space to 3D space with navmesh
         if (endPoint != null)
         {
             List<Vector3> path = new();
@@ -182,7 +180,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
     public float Heuristic(Vector3 start, Vector3 end)
     {
-        return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.z - end.z);
+        return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.y - end.y) + Mathf.Abs(start.z - end.z);
     }
 }
 
