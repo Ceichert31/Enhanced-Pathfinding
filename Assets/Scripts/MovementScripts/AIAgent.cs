@@ -115,11 +115,11 @@ public class AIAgent : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
-    private Vector3 RoundVector(Vector3 vector)
+    private Vector3Int RoundVector(Vector3 vector)
     {
-        return new Vector3(
+        return new Vector3Int(
             Mathf.RoundToInt(vector.x),
-            vector.y,
+            Mathf.RoundToInt(vector.y),
             Mathf.RoundToInt(vector.z)
             );
     }
@@ -128,5 +128,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    List<Vector3> GetPath(Vector3 startPos, Vector3 target);
+    List<Vector3> GetPath(Vector3Int startPos, Vector3Int target);
 }

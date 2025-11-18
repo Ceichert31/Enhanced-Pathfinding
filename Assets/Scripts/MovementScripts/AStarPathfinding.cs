@@ -17,7 +17,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public List<Vector3> GetPath(Vector3 startPos, Vector3 target)
+    public List<Vector3> GetPath(Vector3Int startPos, Vector3Int target)
     {
         Dictionary<WeightedPosition, float> costSoFar = new();
         Dictionary<Vector3, Vector3> cameFrom = new();
@@ -69,6 +69,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 {
                     costSoFar[neighbor] = newCost;
 
+                    //Use nodes in graph, not position 
                     float priority = newCost + Heuristic(neighbor.Position, target);
 
                     //Update came from dictionary
@@ -105,7 +106,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                     break;
                 } 
             }
-            //Reverse path and convert to 3D
+            //Reverse path
             path.Reverse();
             return path;
         }
@@ -132,7 +133,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             if (neighbor3D == null)
                 continue;
 
-            var position = ValidatePosition(neighbor3D.Position, ref visited, ref frontierSet);
+            var position = ValidatePosition(RoundVector(neighbor3D.Position), ref visited, ref frontierSet);
             if (position != null)
             {
                 neighbors.Add(position);
@@ -145,7 +146,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     /// </summary>
     /// <param name="neighbor"></param>
     /// <returns>A weighted position if valid, otherwise null</returns>
-    private WeightedPosition ValidatePosition(Vector3 neighbor, ref HashSet<Vector3> visited, ref HashSet<Vector3> frontierSet)
+    private WeightedPosition ValidatePosition(Vector3Int neighbor, ref HashSet<Vector3> visited, ref HashSet<Vector3> frontierSet)
     {
         Vector2 neighborKey = new(neighbor.x, neighbor.z);
 
@@ -178,20 +179,30 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         return false;
     }
 
-    public float Heuristic(Vector3 start, Vector3 end)
+    public float Heuristic(Vector3Int start, Vector3Int end)
     {
+        //Use vector3 int
+
         return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.y - end.y) + Mathf.Abs(start.z - end.z);
+    }
+    private Vector3Int RoundVector(Vector3 vector)
+    {
+        return new Vector3Int(
+            Mathf.RoundToInt(vector.x),
+            Mathf.RoundToInt(vector.y),
+            Mathf.RoundToInt(vector.z)
+            );
     }
 }
 
 public class WeightedPosition
 {
-    public WeightedPosition(float weight, Vector3 pos)
+    public WeightedPosition(float weight, Vector3Int pos)
     {
         Weight = weight;
         Position = pos;
     }
 
     public float Weight;
-    public Vector3 Position;
+    public Vector3Int Position;
 }
