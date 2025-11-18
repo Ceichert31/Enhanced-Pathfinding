@@ -33,6 +33,10 @@ public class NavmeshGeneration : MonoBehaviour
     [SerializeField]
     private int raycastLevels = 3;
 
+    [Tooltip("The maximum height the navmesh can generate a connection betweeen")]
+    [SerializeField]
+    private float maxTraversableHeight = 0.4f;
+
     [SerializeField]
     private GameObject debugPrefab;
     [SerializeField]
@@ -47,7 +51,6 @@ public class NavmeshGeneration : MonoBehaviour
     private Dictionary<Vector2, GameObject> debugGrid = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
-    private const float MAX_HEIGHT_DIFFERENCE = 0.4f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
@@ -132,7 +135,7 @@ public class NavmeshGeneration : MonoBehaviour
 
         if (Physics.Raycast(castOrigin, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
         {
-            if (Mathf.Abs(castOrigin.y - hitInfo.point.y) < MAX_HEIGHT_DIFFERENCE)
+            if (Mathf.Abs(castOrigin.y - hitInfo.point.y) < maxTraversableHeight)
                 return;
 
             //Set cost as the height of the point of contact
@@ -208,7 +211,7 @@ public class NavmeshGeneration : MonoBehaviour
     {
         if (key == neighborKey) return;
 
-        if (heightDifference < MAX_HEIGHT_DIFFERENCE)
+        if (heightDifference < maxTraversableHeight)
         {
             //Access hash set if it already has one
             var point = GetNavmeshValue(key, height);
