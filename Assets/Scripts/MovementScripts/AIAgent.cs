@@ -100,7 +100,8 @@ public class AIAgent : MonoBehaviour
 
         if (enableDebug)
         {
-            Debug.DrawRay(lastTargetPos, target.position * 2f, Color.yellow);
+            Debug.DrawLine(transform.position, target.position, Color.blue);
+            Debug.DrawLine(transform.position, lastTargetPos, Color.yellow);
 
             lineRenderer.positionCount = path.Count;
             for (int i = 0; i < path.Count; ++i)
