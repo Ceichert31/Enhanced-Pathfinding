@@ -7,6 +7,10 @@ using Utils;
 [RequireComponent(typeof(NavmeshGeneration))]
 public class AStarPathfinding : MonoBehaviour, IPathfinder
 {
+    [Tooltip("The range at which the agent has to reach to be the goal")]
+    [SerializeField]
+    private float stopRange = 2f;
+
     private NavmeshGeneration navmesh;
 
     private const float DEFAULT_MOVEMENT_COST = 1f;
@@ -47,7 +51,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             visited.Add(currentPoint.Position);
 
             //If current point is end point
-            if (new Vector2(currentPoint.Position.x, currentPoint.Position.z) == new Vector2(target.x,target.z))
+            if (Vector3.Distance(currentPoint.Position, target) < stopRange)
             {
                 endPoint = currentPoint;
                 break;
