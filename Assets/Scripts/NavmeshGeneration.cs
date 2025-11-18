@@ -5,10 +5,6 @@ using Random = UnityEngine.Random;
 
 public class NavmeshGeneration : MonoBehaviour
 {
-    //Get all mesh renderers in scene
-    //Transform to world space
-    //
-
     public Dictionary<Vector2, List<TerrainData>> navMeshGrid = new();
 
     [SerializeField]
@@ -33,7 +29,7 @@ public class NavmeshGeneration : MonoBehaviour
     [SerializeField]
     private int raycastLevels = 3;
 
-    [Tooltip("The maximum height the navmesh can generate a connection betweeen")]
+    [Tooltip("The maximum height the navmesh can generate a connection between")]
     [SerializeField]
     private float maxTraversableHeight = 0.4f;
 
