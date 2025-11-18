@@ -100,6 +100,8 @@ public class AIAgent : MonoBehaviour
 
         if (enableDebug)
         {
+            Debug.DrawRay(lastTargetPos, target.position * 2f, Color.yellow);
+
             lineRenderer.positionCount = path.Count;
             for (int i = 0; i < path.Count; ++i)
             {
@@ -124,6 +126,17 @@ public class AIAgent : MonoBehaviour
             );
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        if (Vector3.Distance(transform.position, target.position) < 2.5f)
+        {
+            Gizmos.color = Color.green;
+        }
+
+        Gizmos.DrawWireSphere(target.position, 1f);
+    }
 }
 
 public interface IPathfinder
