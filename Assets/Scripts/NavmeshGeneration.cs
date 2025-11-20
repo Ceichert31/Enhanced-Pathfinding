@@ -88,7 +88,7 @@ public class NavmeshGeneration : MonoBehaviour
                 {
                     if (hitInfo.collider.gameObject.CompareTag("obstacle"))
                     {
-                        AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
+                        //AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
                     }
 
