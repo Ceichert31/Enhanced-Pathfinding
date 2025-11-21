@@ -11,17 +11,26 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     [SerializeField]
     private float stopRange = 2f;
 
+    public List<Vector3> Path { get => _path; }
+
+    private List<Vector3> _path = new();
+
     private NavmeshGeneration navmesh;
 
     private const float DEFAULT_MOVEMENT_COST = 1f;
 
-    private Vector3 currentPosition;
+    private Coroutine instance = null;
     private void Start()
     {
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public List<Vector3> GetPath(Vector3Int startPos, Vector3Int target)
+    public void RunPathfinding(Vector3Int startPos, Vector3Int target)
+    {
+        instance ??= StartCoroutine(GetPath(startPos, target));
+    }
+
+    private IEnumerator GetPath(Vector3Int startPos, Vector3Int target)
     {
         Dictionary<WeightedPosition, float> costSoFar = new();
         Dictionary<Vector3, Vector3> cameFrom = new();
@@ -29,10 +38,14 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         HashSet<Vector3> frontierSet = new();
         HashSet<Vector3> visited = new();
 
+        //Give job priority and budget 
+        //Void return, global variable list 
+
         //Exit early if target is unreachable
         if (ValidatePosition(target, ref visited, ref frontierSet) == null)
         {
-            return null;
+            instance = null;
+            yield return null;
         }
 
         //Initialize start position
@@ -43,11 +56,21 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
         WeightedPosition endPoint = null;
 
+        int iterations = 0;
+
         //While frontier has elements
         while (frontier.Count > 0)
         {
+            iterations++;
+
+            if (iterations > 1000)
+            {
+                iterations = 0;
+                instance = null;
+                yield return null;
+            }
+
             var currentPoint = frontier.Dequeue();
-            currentPosition = currentPoint.Position;
             visited.Add(currentPoint.Position);
 
             //If current point is end point
@@ -96,7 +119,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
 
             if (current == null)
             {
-                return null;
+                instance = null;
+                yield return null;
             }
 
             //Recreate path
@@ -112,10 +136,11 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             }
             //Reverse path
             path.Reverse();
-            return path;
+            _path = path;
         }
 
-        return null;
+        instance = null;
+        yield return null;
     }
 
     /// <summary>
