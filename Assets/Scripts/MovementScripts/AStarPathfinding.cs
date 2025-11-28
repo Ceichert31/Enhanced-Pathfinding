@@ -7,110 +7,150 @@ using Utils;
 [RequireComponent(typeof(NavmeshGeneration))]
 public class AStarPathfinding : MonoBehaviour, IPathfinder
 {
+    [Tooltip("The range at which the agent has to reach to be the goal")]
+    [SerializeField]
+    private float stopRange = 2f;
+
+    public List<Vector3> Path { get => _path; }
+
+    private List<Vector3> _path = new();
+
     private NavmeshGeneration navmesh;
 
     private const float DEFAULT_MOVEMENT_COST = 1f;
 
-    private Vector3 currentPosition;
+    private Coroutine instance = null;
     private void Start()
     {
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public List<Vector3> GetPath(Vector3 startPos, Vector3 target)
+    public void RunPathfinding(Vector3Int startPos, Vector3Int target)
     {
-        Dictionary<WeightedPosition, float> costSoFar = new();
-        Dictionary<Vector3, Vector3> cameFrom = new();
-        PriorityQueue<WeightedPosition, float> frontier = new();
-        HashSet<Vector3> frontierSet = new();
-        HashSet<Vector3> visited = new();
-
-        //Exit early if target is unreachable
-        if (ValidatePosition(target, ref visited, ref frontierSet) == null)
+        if (instance == null)
         {
-            return null;
+            instance = StartCoroutine(GetPath(startPos, target));
         }
+    }
 
-        //Initialize start position
-        WeightedPosition startWeight = new(0.0f, startPos);
-        frontier.Enqueue(startWeight, 0);
-        costSoFar.Add(startWeight, 0);
-        frontierSet.Add(startWeight.Position);
-
-        WeightedPosition endPoint = null;
-
-        //While frontier has elements
-        while (frontier.Count > 0)
+    private IEnumerator GetPath(Vector3Int startPos, Vector3Int target)
+    {
+        try
         {
-            var currentPoint = frontier.Dequeue();
-            currentPosition = currentPoint.Position;
-            visited.Add(currentPoint.Position);
+            Dictionary<WeightedPosition, float> costSoFar = new();
+            Dictionary<Vector3, Vector3> cameFrom = new();
+            PriorityQueue<WeightedPosition, float> frontier = new();
+            HashSet<Vector3> frontierSet = new();
+            HashSet<Vector3> visited = new();
 
-            //If current point is end point
-            if (new Vector2(currentPoint.Position.x, currentPoint.Position.z) == new Vector2(target.x,target.z))
+            //Give job priority and budget 
+            //Void return, global variable list 
+
+            //Exit early if target is unreachable
+            if (ValidatePosition(target, ref visited, ref frontierSet) == null)
             {
-                endPoint = currentPoint;
-                break;
+                instance = null;
+                yield return null;
             }
 
-            var neighbors = GetVisitableNeighbors(currentPoint.Position, ref visited, ref frontierSet);
-            if (neighbors.Count == 0)
-            {
-                continue;
-            }
+            //Initialize start position
+            WeightedPosition startWeight = new(0.0f, startPos);
+            frontier.Enqueue(startWeight, 0);
+            costSoFar.Add(startWeight, 0);
+            frontierSet.Add(startWeight.Position);
 
-            foreach (var neighbor in neighbors) 
-            {
-                //Calculate new cost of travel
-                float newCost = costSoFar[currentPoint] + DEFAULT_MOVEMENT_COST + Mathf.Abs(neighbor.Weight - currentPoint.Position.y);
+            WeightedPosition endPoint = null;
 
-                //Check if the neighbor exists already in the frontier and if it does, check its old cost
-                if (!frontierSet.Contains(neighbor.Position) || costSoFar[neighbor] > newCost)
+            int iterations = 0;
+
+            //While frontier has elements
+            while (frontier.Count > 0)
+            {
+                iterations++;
+
+                if (iterations > 500)
                 {
-                    costSoFar[neighbor] = newCost;
-
-                    float priority = newCost + Heuristic(neighbor.Position, target);
-
-                    //Update came from dictionary
-                    cameFrom[neighbor.Position] = currentPoint.Position;
-                    //Add neighbor to frontier
-                    frontier.Enqueue(neighbor, priority);
-                    frontierSet.Add(neighbor.Position);
+                    iterations = 0;
+                    instance = null;
+                    yield return null;
                 }
 
-            }
-        }
+                var currentPoint = frontier.Dequeue();
+                visited.Add(currentPoint.Position);
 
-        //If we find an end point
-        if (endPoint != null)
-        {
-            List<Vector3> path = new();
-
-            path.Add(endPoint.Position);
-            cameFrom.TryGetValue(endPoint.Position, out Vector3 current);
-
-            if (current == null)
-            {
-                return null;
-            }
-
-            //Recreate path
-            while (current != startPos)
-            {
-                path.Add(current);
-
-                //If we can't get pos, break the loop
-                if (!cameFrom.TryGetValue(current, out current))
+                //If current point is end point
+                if (Vector3.Distance(currentPoint.Position, target) < stopRange)
                 {
+                    endPoint = currentPoint;
                     break;
-                } 
-            }
-            //Reverse path and convert to 3D
-            path.Reverse();
-            return path;
-        }
+                }
 
-        return null;
+                var neighbors = GetVisitableNeighbors(currentPoint.Position, ref visited, ref frontierSet);
+                if (neighbors.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var neighbor in neighbors)
+                {
+                    //Calculate new cost of travel
+                    float newCost = costSoFar[currentPoint] + DEFAULT_MOVEMENT_COST + Mathf.Abs(neighbor.Weight - currentPoint.Position.y);
+
+                    //Check if the neighbor exists already in the frontier and if it does, check its old cost
+                    if (!frontierSet.Contains(neighbor.Position) || costSoFar[neighbor] > newCost)
+                    {
+                        costSoFar[neighbor] = newCost;
+
+                        //Use nodes in graph, not position 
+                        float priority = newCost + Heuristic(neighbor.Position, target);
+
+                        //Update came from dictionary
+                        cameFrom[neighbor.Position] = currentPoint.Position;
+                        //Add neighbor to frontier
+                        frontier.Enqueue(neighbor, priority);
+                        frontierSet.Add(neighbor.Position);
+                    }
+
+                }
+            }
+
+            //If we find an end point
+            if (endPoint != null)
+            {
+                List<Vector3> path = new();
+
+                path.Add(endPoint.Position);
+                cameFrom.TryGetValue(endPoint.Position, out Vector3 current);
+
+                if (current == null)
+                {
+                    instance = null;
+                    yield return null;
+                }
+
+                //Recreate path
+                while (current != startPos)
+                {
+                    path.Add(current);
+
+                    //If we can't get pos, break the loop
+                    if (!cameFrom.TryGetValue(current, out current))
+                    {
+                        break;
+                    }
+                }
+                //Reverse path
+                path.Reverse();
+                _path = path;
+            }
+
+            instance = null;
+            yield return null;
+        }
+        finally
+        {
+            instance = null;
+        }
     }
 
     /// <summary>
@@ -132,7 +172,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             if (neighbor3D == null)
                 continue;
 
-            var position = ValidatePosition(neighbor3D.Position, ref visited, ref frontierSet);
+            var position = ValidatePosition(RoundVector(neighbor3D.Position), ref visited, ref frontierSet);
             if (position != null)
             {
                 neighbors.Add(position);
@@ -145,7 +185,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     /// </summary>
     /// <param name="neighbor"></param>
     /// <returns>A weighted position if valid, otherwise null</returns>
-    private WeightedPosition ValidatePosition(Vector3 neighbor, ref HashSet<Vector3> visited, ref HashSet<Vector3> frontierSet)
+    private WeightedPosition ValidatePosition(Vector3Int neighbor, ref HashSet<Vector3> visited, ref HashSet<Vector3> frontierSet)
     {
         Vector2 neighborKey = new(neighbor.x, neighbor.z);
 
@@ -178,20 +218,30 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         return false;
     }
 
-    public float Heuristic(Vector3 start, Vector3 end)
+    public float Heuristic(Vector3Int start, Vector3Int end)
     {
+        //Use vector3 int
+
         return Mathf.Abs(start.x - end.x) + Mathf.Abs(start.y - end.y) + Mathf.Abs(start.z - end.z);
+    }
+    private Vector3Int RoundVector(Vector3 vector)
+    {
+        return new Vector3Int(
+            Mathf.RoundToInt(vector.x),
+            Mathf.RoundToInt(vector.y),
+            Mathf.RoundToInt(vector.z)
+            );
     }
 }
 
 public class WeightedPosition
 {
-    public WeightedPosition(float weight, Vector3 pos)
+    public WeightedPosition(float weight, Vector3Int pos)
     {
         Weight = weight;
         Position = pos;
     }
 
     public float Weight;
-    public Vector3 Position;
+    public Vector3Int Position;
 }

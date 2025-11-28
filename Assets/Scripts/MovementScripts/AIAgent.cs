@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -67,7 +68,7 @@ public class AIAgent : MonoBehaviour
 
         lastTargetPos = target.position;
 
-        path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
+        pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
     }
 
     /// <summary>
@@ -80,12 +81,18 @@ public class AIAgent : MonoBehaviour
 
     private void Update()
     {
-        if (Vector3.Distance(lastTargetPos, target.position) > recalculatePathDistance)
+        //Timeout threshold
+
+        //Update local path
+        path = pathfindingAlgorithm.Path;
+        pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
+
+     /*   if (Vector3.Distance(lastTargetPos, target.position) > recalculatePathDistance)
         {
             //Get path to target
-            path = pathfindingAlgorithm.GetPath(RoundVector(transform.position), RoundVector(target.position));
+           
             lastTargetPos = transform.position;
-        }
+        }*/
 
         if (path == null || path.Count <= 1)
         {
@@ -100,6 +107,9 @@ public class AIAgent : MonoBehaviour
 
         if (enableDebug)
         {
+            //Debug.DrawLine(transform.position, target.position, Color.blue);
+            //Debug.DrawLine(transform.position, lastTargetPos, Color.yellow);
+
             lineRenderer.positionCount = path.Count;
             for (int i = 0; i < path.Count; ++i)
             {
@@ -115,18 +125,30 @@ public class AIAgent : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
-    private Vector3 RoundVector(Vector3 vector)
+    private Vector3Int RoundVector(Vector3 vector)
     {
-        return new Vector3(
+        return new Vector3Int(
             Mathf.RoundToInt(vector.x),
-            vector.y,
+            Mathf.RoundToInt(vector.y),
             Mathf.RoundToInt(vector.z)
             );
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        if (Vector3.Distance(transform.position, target.position) < 2.5f)
+        {
+            Gizmos.color = Color.green;
+        }
+
+        Gizmos.DrawWireSphere(target.position, 1f);
+    }
 }
 
 public interface IPathfinder
 {
-    List<Vector3> GetPath(Vector3 startPos, Vector3 target);
+    public List<Vector3> Path { get; }
+    public void RunPathfinding(Vector3Int startPos, Vector3Int target);
 }
