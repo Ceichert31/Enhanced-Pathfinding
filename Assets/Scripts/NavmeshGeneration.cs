@@ -88,7 +88,7 @@ public class NavmeshGeneration : MonoBehaviour
                 {
                     if (hitInfo.collider.gameObject.CompareTag("obstacle"))
                     {
-                        //AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
+                        AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
                     }
 
@@ -225,9 +225,9 @@ public class NavmeshGeneration : MonoBehaviour
     {
         if (enableDebug)
         {
-            for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
+            for (int i = (int)minBound.x; i < maxBound.x; i += 1)
             {
-                for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
+                for (int j = (int)minBound.y; j < maxBound.y; j += 1)
                 {
                     Vector2 key = new(i, j);
 
@@ -237,6 +237,9 @@ public class NavmeshGeneration : MonoBehaviour
                     foreach (var point in pointList)
                     {
                         if (point == null) continue;
+
+                        if (Vector3.Distance(Camera.main.transform.position, point.Position) > 8)
+                            continue;
 
                         if (!point.IsWalkable)
                         {
