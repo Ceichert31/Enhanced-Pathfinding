@@ -211,7 +211,16 @@ public class NavmeshGeneration : MonoBehaviour
         {
             //Access hash set if it already has one
             var point = GetNavmeshValue(key, height);
-            if (point == null) return;
+            var neighborPoint = GetNavmeshValue(neighborKey, height);
+            if (point == null || neighborPoint == null) return;
+
+            // Check if wall blocks the connection
+            if (Physics.Linecast(point.Position + Vector3.up * 0.1f,
+                                neighborPoint.Position + Vector3.up * 0.1f,
+                                obstacleLayer))
+            {
+                return;
+            }
 
             //Add neighbor to connections list
             point.GetConnections().Add(neighborKey);
