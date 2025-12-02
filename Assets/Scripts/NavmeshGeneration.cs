@@ -230,7 +230,7 @@ public class NavmeshGeneration : MonoBehaviour
             //Check if wall blocks the connection
             if (Physics.Linecast(point.Position + Vector3.up,
                                 neighborPoint.Position + Vector3.up,
-                                obstacleLayer))
+                                hitLayer))
             {
                 return;
             }
