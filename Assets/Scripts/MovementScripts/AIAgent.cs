@@ -82,14 +82,7 @@ public class AIAgent : MonoBehaviour
 
         pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
 
-        if (pathfindingAlgorithm.Path.Count > 0)
-        {
-            path = pathfindingAlgorithm.Path;
-        }
-        else
-        {
-            return;
-        }
+        path = pathfindingAlgorithm.Path;
 
         if (path == null || path.Count <= 1)
         {

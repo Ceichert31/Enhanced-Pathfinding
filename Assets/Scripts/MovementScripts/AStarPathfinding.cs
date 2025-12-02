@@ -50,12 +50,12 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 instance = null;
                 yield return null;
             }
-
+/*
             if (ValidatePosition(startPos, ref visited, ref frontierSet) == null)
             {
                 _path.Clear();
-                _path.Add(Vector3.zero);
-            }
+
+            }*/
 
             //Initialize start position
             WeightedPosition startWeight = new(0.0f, startPos);
