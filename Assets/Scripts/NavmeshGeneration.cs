@@ -50,6 +50,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Dictionary<Vector2, GameObject> debugGrid = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
+    private const float DIAGONAL_COST = 1f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
@@ -193,6 +194,12 @@ public class NavmeshGeneration : MonoBehaviour
                 var point = GetNavmeshValue(neighborKey, hitPointHeight);
 
                 if (point == null) continue;
+
+                //If Diagonal, set weight higher
+                if (i != key.x && j != key.y)
+                {
+                    point.MovementCost += DIAGONAL_COST;
+                }
 
                 float heightDifference = Mathf.Abs(point.Position.y - hitPointHeight);
 
