@@ -34,6 +34,9 @@ public class NavmeshGeneration : MonoBehaviour
     private float maxTraversableHeight = 0.4f;
 
     [SerializeField]
+    private bool enableDiagonals = true;
+
+    [SerializeField]
     private GameObject debugPrefab;
     [SerializeField]
     private GameObject obstaclePrefab;
@@ -172,9 +175,12 @@ public class NavmeshGeneration : MonoBehaviour
         {
             for (int j = (int)key.y -1; j < (int)key.y + 2; ++j)
             {
-                //Skip adding diagonal neighbors
-                if (i != key.x && j != key.y)
-                    continue;
+                if (!enableDiagonals)
+                {
+                    //Skip adding diagonal neighbors
+                    if (i != key.x && j != key.y)
+                        continue;
+                }
 
                 //Skip adding self
                 if (i == key.x && j == key.y)
@@ -214,9 +220,9 @@ public class NavmeshGeneration : MonoBehaviour
             var neighborPoint = GetNavmeshValue(neighborKey, height);
             if (point == null || neighborPoint == null) return;
 
-            // Check if wall blocks the connection
-            if (Physics.Linecast(point.Position + Vector3.up * 0.1f,
-                                neighborPoint.Position + Vector3.up * 0.1f,
+            //Check if wall blocks the connection
+            if (Physics.Linecast(point.Position + Vector3.up,
+                                neighborPoint.Position + Vector3.up,
                                 obstacleLayer))
             {
                 return;

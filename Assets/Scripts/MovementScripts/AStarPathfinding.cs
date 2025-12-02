@@ -44,9 +44,6 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             HashSet<Vector3> frontierSet = new();
             HashSet<Vector3> visited = new();
 
-            //Give job priority and budget 
-            //Void return, global variable list 
-
             //Exit early if target is unreachable
             if (ValidatePosition(target, ref visited, ref frontierSet) == null)
             {
@@ -72,6 +69,7 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 if (iterations > maxIterations)
                 {
                     instance = null;
+                    Debug.Log("Timed out!");
                     yield return null;
                 }
 
@@ -142,6 +140,10 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 //Reverse path
                 path.Reverse();
                 _path = path;
+            }
+            else
+            {
+                Path.Clear();
             }
 
             instance = null;
