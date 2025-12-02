@@ -80,9 +80,7 @@ public class AIAgent : MonoBehaviour
     {
         //Issue: agent position sometimes moves off navmesh, and must move to nearest navmesh point to proceed again
 
-        pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
-
-        path = pathfindingAlgorithm.Path;
+        path = pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
 
         if (path == null || path.Count <= 1)
         {
@@ -124,6 +122,5 @@ public class AIAgent : MonoBehaviour
 
 public interface IPathfinder
 {
-    public List<Vector3> Path { get; }
-    public void RunPathfinding(Vector3Int startPos, Vector3Int target);
+    public List<Vector3> RunPathfinding(Vector3Int startPos, Vector3Int target);
 }

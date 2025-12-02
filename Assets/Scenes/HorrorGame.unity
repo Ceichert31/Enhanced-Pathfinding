@@ -4715,7 +4715,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stopRange: 3.5
-  maxIterations: 1000
+  maxIterations: 5000
 --- !u!114 &1578448126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4756,7 +4756,7 @@ MonoBehaviour:
   debugResolution: 3
   raycastLevels: 3
   maxTraversableHeight: 1
-  enableDiagonals: 1
+  enableDiagonals: 0
   debugPrefab: {fileID: 9155662150565292642, guid: 329a62d9074ed414fb1ff7f9870496d8, type: 3}
   obstaclePrefab: {fileID: 8358901623162428206, guid: 7b9ebdd105af87c468603d4900e79844, type: 3}
   debugParent: {fileID: 868315507}

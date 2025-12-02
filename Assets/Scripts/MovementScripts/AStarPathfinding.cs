@@ -11,11 +11,9 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     [SerializeField]
     private float stopRange = 2f;
 
-    [Range(1f, 5000f)]
+    [Range(1f, 15000f)]
     [SerializeField]
     private int maxIterations;
-
-    public List<Vector3> Path { get => _path; }
 
     private List<Vector3> _path = new();
 
@@ -29,9 +27,11 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public void RunPathfinding(Vector3Int startPos, Vector3Int target)
+    public List<Vector3> RunPathfinding(Vector3Int startPos, Vector3Int target)
     {
         instance ??= StartCoroutine(GetPath(startPos, target));
+
+        return _path;
     }
 
     private IEnumerator GetPath(Vector3Int startPos, Vector3Int target)
@@ -149,7 +149,8 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             }
             else
             {
-                Path.Clear();
+                //Empty pathfinding path if no goal is found
+                _path.Clear();
             }
 
             instance = null;
