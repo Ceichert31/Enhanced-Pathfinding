@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ConnectionManager : MonoBehaviour
 {
+    //data manager for lists of connection types
+
+    public List<MapTile> mapTilePrefabs;
     // Start is called before the first frame update
     void Start()
     {
