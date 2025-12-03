@@ -23,6 +23,38 @@ public class MapTile : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    public int getSockets(int choice)
+    {
+        switch (choice)
+        {
+            case 1:
+                return frontSocket;
+            case 2:
+                return rightSocket;
+            case 3:
+                return backSocket;
+            case 4:
+                return leftSocket;
+        }
+        return 0;
+    }
+
+    public int getConnections(int choice)
+    {
+        switch (choice)
+        {
+            case 1:
+                return frontConnections.Count;
+            case 2:
+                return rightConnections.Count;
+            case 3:
+                return backConnections.Count;
+            case 4:
+                return leftConnections.Count;
+        }
+        return 0;
     }
 }
