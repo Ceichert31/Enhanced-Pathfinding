@@ -11,7 +11,9 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
     [SerializeField]
     private float stopRange = 2f;
 
-    public List<Vector3> Path { get => _path; }
+    [Range(1f, 15000f)]
+    [SerializeField]
+    private int maxIterations;
 
     private List<Vector3> _path = new();
 
@@ -25,12 +27,11 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
         navmesh = GetComponent<NavmeshGeneration>();
     }
 
-    public void RunPathfinding(Vector3Int startPos, Vector3Int target)
+    public List<Vector3> RunPathfinding(Vector3Int startPos, Vector3Int target)
     {
-        if (instance == null)
-        {
-            instance = StartCoroutine(GetPath(startPos, target));
-        }
+        instance ??= StartCoroutine(GetPath(startPos, target));
+
+        return _path;
     }
 
     private IEnumerator GetPath(Vector3Int startPos, Vector3Int target)
@@ -43,15 +44,18 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             HashSet<Vector3> frontierSet = new();
             HashSet<Vector3> visited = new();
 
-            //Give job priority and budget 
-            //Void return, global variable list 
-
             //Exit early if target is unreachable
             if (ValidatePosition(target, ref visited, ref frontierSet) == null)
             {
                 instance = null;
                 yield return null;
             }
+/*
+            if (ValidatePosition(startPos, ref visited, ref frontierSet) == null)
+            {
+                _path.Clear();
+
+            }*/
 
             //Initialize start position
             WeightedPosition startWeight = new(0.0f, startPos);
@@ -68,10 +72,10 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
             {
                 iterations++;
 
-                if (iterations > 500)
+                if (iterations > maxIterations)
                 {
-                    iterations = 0;
                     instance = null;
+                    Debug.Log("Timed out!");
                     yield return null;
                 }
 
@@ -142,6 +146,11 @@ public class AStarPathfinding : MonoBehaviour, IPathfinder
                 //Reverse path
                 path.Reverse();
                 _path = path;
+            }
+            else
+            {
+                //Empty pathfinding path if no goal is found
+                _path.Clear();
             }
 
             instance = null;

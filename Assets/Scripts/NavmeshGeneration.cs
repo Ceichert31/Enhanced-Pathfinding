@@ -34,6 +34,9 @@ public class NavmeshGeneration : MonoBehaviour
     private float maxTraversableHeight = 0.4f;
 
     [SerializeField]
+    private bool enableDiagonals = true;
+
+    [SerializeField]
     private GameObject debugPrefab;
     [SerializeField]
     private GameObject obstaclePrefab;
@@ -47,6 +50,7 @@ public class NavmeshGeneration : MonoBehaviour
     private Dictionary<Vector2, GameObject> debugGrid = new();
 
     private const float NAVMESH_HEIGHT = 100.0f;
+    private const float DIAGONAL_COST = 1f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
@@ -88,7 +92,7 @@ public class NavmeshGeneration : MonoBehaviour
                 {
                     if (hitInfo.collider.gameObject.CompareTag("obstacle"))
                     {
-                        //AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
+                        AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
                     }
 
@@ -172,9 +176,12 @@ public class NavmeshGeneration : MonoBehaviour
         {
             for (int j = (int)key.y -1; j < (int)key.y + 2; ++j)
             {
-                //Skip adding diagonal neighbors
-                if (i != key.x && j != key.y)
-                    continue;
+                if (!enableDiagonals)
+                {
+                    //Skip adding diagonal neighbors
+                    if (i != key.x && j != key.y)
+                        continue;
+                }
 
                 //Skip adding self
                 if (i == key.x && j == key.y)
@@ -187,6 +194,12 @@ public class NavmeshGeneration : MonoBehaviour
                 var point = GetNavmeshValue(neighborKey, hitPointHeight);
 
                 if (point == null) continue;
+
+                //If Diagonal, set weight higher
+                if (i != key.x && j != key.y)
+                {
+                    point.MovementCost += DIAGONAL_COST;
+                }
 
                 float heightDifference = Mathf.Abs(point.Position.y - hitPointHeight);
 
@@ -211,7 +224,16 @@ public class NavmeshGeneration : MonoBehaviour
         {
             //Access hash set if it already has one
             var point = GetNavmeshValue(key, height);
-            if (point == null) return;
+            var neighborPoint = GetNavmeshValue(neighborKey, height);
+            if (point == null || neighborPoint == null) return;
+
+            //Check if wall blocks the connection
+            if (Physics.Linecast(point.Position + Vector3.up,
+                                neighborPoint.Position + Vector3.up,
+                                hitLayer))
+            {
+                return;
+            }
 
             //Add neighbor to connections list
             point.GetConnections().Add(neighborKey);
@@ -225,9 +247,9 @@ public class NavmeshGeneration : MonoBehaviour
     {
         if (enableDebug)
         {
-            for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
+            for (int i = (int)minBound.x; i < maxBound.x; i += 1)
             {
-                for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
+                for (int j = (int)minBound.y; j < maxBound.y; j += 1)
                 {
                     Vector2 key = new(i, j);
 
@@ -237,6 +259,9 @@ public class NavmeshGeneration : MonoBehaviour
                     foreach (var point in pointList)
                     {
                         if (point == null) continue;
+
+                        if (Vector3.Distance(Camera.main.transform.position, point.Position) > 8)
+                            continue;
 
                         if (!point.IsWalkable)
                         {

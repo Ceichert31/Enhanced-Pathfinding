@@ -49,7 +49,6 @@ public class AIAgent : MonoBehaviour
 
     private LineRenderer lineRenderer;
 
-    private Vector3 lastTargetPos;
     private List<Vector3> path = new();
 
     private const float CAPSULE_OFFSET = 1f;
@@ -66,8 +65,6 @@ public class AIAgent : MonoBehaviour
         }
         lineRenderer = GetComponent<LineRenderer>();
 
-        lastTargetPos = target.position;
-
         pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
     }
 
@@ -81,18 +78,8 @@ public class AIAgent : MonoBehaviour
 
     private void Update()
     {
-        //Timeout threshold
-
-        //Update local path
-        path = pathfindingAlgorithm.Path;
-        pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
-
-     /*   if (Vector3.Distance(lastTargetPos, target.position) > recalculatePathDistance)
-        {
-            //Get path to target
-           
-            lastTargetPos = transform.position;
-        }*/
+        //Issue: agent position sometimes moves off navmesh, and must move to nearest navmesh point to proceed again
+        path = pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
 
         if (path == null || path.Count <= 1)
         {
@@ -107,9 +94,6 @@ public class AIAgent : MonoBehaviour
 
         if (enableDebug)
         {
-            //Debug.DrawLine(transform.position, target.position, Color.blue);
-            //Debug.DrawLine(transform.position, lastTargetPos, Color.yellow);
-
             lineRenderer.positionCount = path.Count;
             for (int i = 0; i < path.Count; ++i)
             {
@@ -133,22 +117,9 @@ public class AIAgent : MonoBehaviour
             Mathf.RoundToInt(vector.z)
             );
     }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-
-        if (Vector3.Distance(transform.position, target.position) < 2.5f)
-        {
-            Gizmos.color = Color.green;
-        }
-
-        Gizmos.DrawWireSphere(target.position, 1f);
-    }
 }
 
 public interface IPathfinder
 {
-    public List<Vector3> Path { get; }
-    public void RunPathfinding(Vector3Int startPos, Vector3Int target);
+    public List<Vector3> RunPathfinding(Vector3Int startPos, Vector3Int target);
 }
