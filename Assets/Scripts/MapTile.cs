@@ -14,7 +14,9 @@ public class MapTile : MonoBehaviour
     public List<int> backConnections;
     public List<int> leftConnections;
     public List<int> rightConnections;
+    public int tileID; //used for organization within connectionData instead of storing prefabs
     // Start is called before the first frame update
+    public List<int> tilePossibilities;
     void Start()
     {
         

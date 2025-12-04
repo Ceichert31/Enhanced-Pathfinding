@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ConnectionManager : MonoBehaviour
@@ -9,8 +10,7 @@ public class ConnectionManager : MonoBehaviour
     public int mapSize; //dimension of the map, for a map of size (mapsize X mapsize)
 
     //data manager for lists of connection types
-
-    public List<GameObject> mapTilePrefabs;
+    [SerializeField] ConnectionData connectionData;
 
     public bool run;
 
@@ -44,11 +44,11 @@ public class ConnectionManager : MonoBehaviour
         {
             if (checkedObject.GetComponent<MapTile>().getConnections(1) == 0)
             {
-                for (int i = 0; i < mapTilePrefabs.Count; i++)
+                for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (mapTilePrefabs[i].GetComponent<MapTile>().getSockets(3) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(3) == 0)
                     {
-                        chooseFrom.Add(mapTilePrefabs[i]);
+                        chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }
                 }
             }
@@ -57,11 +57,11 @@ public class ConnectionManager : MonoBehaviour
         {
             if (checkedObject.GetComponent<MapTile>().getConnections(2) == 0)
             {
-                for (int i = 0; i < mapTilePrefabs.Count; i++)
+                for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (mapTilePrefabs[i].GetComponent<MapTile>().getSockets(4) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(4) == 0)
                     {
-                        chooseFrom.Add(mapTilePrefabs[i]);
+                        chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }
                 }
             }
@@ -70,11 +70,11 @@ public class ConnectionManager : MonoBehaviour
         {
             if (checkedObject.GetComponent<MapTile>().getConnections(3) == 0)
             {
-                for (int i = 0; i < mapTilePrefabs.Count; i++)
+                for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (mapTilePrefabs[i].GetComponent<MapTile>().getSockets(1) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(1) == 0)
                     {
-                        chooseFrom.Add(mapTilePrefabs[i]);
+                        chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }
                 }
             }
@@ -83,11 +83,11 @@ public class ConnectionManager : MonoBehaviour
         {
             if (checkedObject.GetComponent<MapTile>().getConnections(4) == 0)
             {
-                for (int i = 0; i < mapTilePrefabs.Count; i++)
+                for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (mapTilePrefabs[i].GetComponent<MapTile>().getSockets(2) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(2) == 0)
                     {
-                        chooseFrom.Add(mapTilePrefabs[i]);
+                        chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }
                 }
             }
