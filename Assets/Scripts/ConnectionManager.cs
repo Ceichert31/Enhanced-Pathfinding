@@ -40,52 +40,52 @@ public class ConnectionManager : MonoBehaviour
     List<GameObject> check(GameObject checkedObject)
     {
         List<GameObject> chooseFrom = new List<GameObject>();
-        if (checkedObject.GetComponent<MapTile>().getSockets(1) == 0)//checks up
+        if (checkedObject.GetComponent<MapTile>().GetSockets(1) == 0)//checks up
         {
-            if (checkedObject.GetComponent<MapTile>().getConnections(1) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(1) == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(3) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().GetSockets(3) == 0)
                     {
                         chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }
                 }
             }
         }
-        if (checkedObject.GetComponent<MapTile>().getSockets(2) == 0)//checks right
+        if (checkedObject.GetComponent<MapTile>().GetSockets(2) == 0)//checks right
         {
-            if (checkedObject.GetComponent<MapTile>().getConnections(2) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(2) == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(4) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().GetSockets(4) == 0)
                     {
                         chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }
                 }
             }
         }
-        if (checkedObject.GetComponent<MapTile>().getSockets(3) == 0)//checks down
+        if (checkedObject.GetComponent<MapTile>().GetSockets(3) == 0)//checks down
         {
-            if (checkedObject.GetComponent<MapTile>().getConnections(3) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(3) == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(1) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().GetSockets(1) == 0)
                     {
                         chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }
                 }
             }
         }
-        if (checkedObject.GetComponent<MapTile>().getSockets(4) == 0)//checks left
+        if (checkedObject.GetComponent<MapTile>().GetSockets(4) == 0)//checks left
         {
-            if (checkedObject.GetComponent<MapTile>().getConnections(4) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(4) == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
-                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().getSockets(2) == 0)
+                    if (connectionData.mapTilePrefabs[i].GetComponent<MapTile>().GetSockets(2) == 0)
                     {
                         chooseFrom.Add(connectionData.mapTilePrefabs[i]);
                     }

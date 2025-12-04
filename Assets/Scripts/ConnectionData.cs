@@ -5,6 +5,8 @@ using UnityEngine;
 public class ConnectionData : MonoBehaviour
 {
     public List<GameObject> mapTilePrefabs;
+
+    //lists of all possible sets of connections
     public List<int> standardSet;
 
     // Start is called before the first frame update
@@ -13,6 +15,7 @@ public class ConnectionData : MonoBehaviour
         for(int i = 0; i < mapTilePrefabs.Count; i++)
         {
             standardSet.Add(mapTilePrefabs[i].GetComponent<MapTile>().tileID);
+            standardSet.Sort((tile1, tile2) => tile1.CompareTo(tile2)); //sort in ascending order
         }
     }
 

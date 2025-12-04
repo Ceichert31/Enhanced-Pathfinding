@@ -25,21 +25,35 @@ public class WFCMap : MonoBehaviour
                 mapGrid[x, y].tilePossibilities = connectionData.standardSet;
             }
         }
-        //collapse random tile to start
-        int randX = Random.Range(0, mapSize);
-        int randY = Random.Range(0, mapSize);
+        //collapse tile to start
         Stack<MapTile> tileStack = new();
-        MapTile currentTile = mapGrid[randX, randY];
-        tileStack.Push(currentTile);
+        while(true)
+        {
+            MapTile currentTile = findLowestEntropy(mapGrid);
+            if (currentTile == null) break;
+
+            currentTile = collapseRandomTile(currentTile);
+
+            tileStack.Push(currentTile);
+
+            //check constraints
+
+            if(tileStack.Count != 0 && tileStack.Peek().tilePossibilities.Count != 0)
+            {
+                //backtrack
+            }
+        }
+        
     }
 
+    //finds a tile with the lowest entropy in a list
     MapTile findLowestEntropy(MapTile[,] mapGrid)
     {
         MapTile minCell = null;
         int minEntropy = int.MaxValue;
-        for(int x = 0; x < mapGrid.Length; x++)
+        for (int x = 0; x < mapGrid.Length; x++)
         {
-            for(int y = 0; y < mapGrid.Length; y++)
+            for (int y = 0; y < mapGrid.Length; y++)
             {
                 int entropy = mapGrid[x, y].tilePossibilities.Count;
                 if (entropy > 1 && entropy < minEntropy)
@@ -49,8 +63,26 @@ public class WFCMap : MonoBehaviour
                 }
             }
         }
-
         return minCell;
+    }
+
+    MapTile collapseRandomTile(MapTile tile)
+    {
+        int tileIndex = Random.Range(0, tile.tilePossibilities.Count - 1);
+        int prefabID = tile.tilePossibilities[tileIndex];
+        tile = connectionData.mapTilePrefabs[prefabID].GetComponent<MapTile>();
+        return tile;
+    }
+    
+    Stack<MapTile> backtrackStack(Stack<MapTile> stack)
+    {
+        while (stack.Count > 0)
+        {
+            MapTile top = stack.Pop();
+            top.tilePossibilities = connectionData.standardSet;
+            top.Reset();
+        }
+        return stack;
     }
 
 }

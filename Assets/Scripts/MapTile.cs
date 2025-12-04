@@ -17,6 +17,7 @@ public class MapTile : MonoBehaviour
     public int tileID; //used for organization within connectionData instead of storing prefabs
     // Start is called before the first frame update
     public List<int> tilePossibilities;
+    bool collapsed = false;
     void Start()
     {
         
@@ -28,7 +29,7 @@ public class MapTile : MonoBehaviour
 
     }
 
-    public int getSockets(int choice)
+    public int GetSockets(int choice)
     {
         switch (choice)
         {
@@ -44,7 +45,7 @@ public class MapTile : MonoBehaviour
         return 0;
     }
 
-    public int getConnections(int choice)
+    public int GetConnections(int choice)
     {
         switch (choice)
         {
@@ -58,5 +59,19 @@ public class MapTile : MonoBehaviour
                 return leftConnections.Count;
         }
         return 0;
+    }
+
+    public void Reset()
+    {
+        tileID = 0;
+        collapsed = false;
+        frontSocket = 0;
+        backSocket = 0;
+        leftSocket = 0;
+        rightSocket = 0;
+        frontConnections.Clear();
+        backConnections.Clear();
+        leftConnections.Clear();
+        rightConnections.Clear();
     }
 }
