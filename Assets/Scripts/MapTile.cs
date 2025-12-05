@@ -5,7 +5,6 @@ using UnityEngine;
 public class MapTile : MonoBehaviour
 {
     //front, back, left, right sockets for sorting
-    public Vector3 position;
     public Vector2 gridPosition;
     public int frontSocket;
     public int backSocket;
@@ -22,7 +21,7 @@ public class MapTile : MonoBehaviour
     public bool collapsed = false;
     void Start()
     {
-        position = transform.position;
+        
     }
 
     // Update is called once per frame
@@ -75,5 +74,10 @@ public class MapTile : MonoBehaviour
         backConnections.Clear();
         leftConnections.Clear();
         rightConnections.Clear();
+    }
+
+    public void setGridPosition(Vector2 gridPos)
+    {
+        gridPosition = gridPos;
     }
 }

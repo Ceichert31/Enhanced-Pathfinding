@@ -48,7 +48,8 @@ public class WFCMap : MonoBehaviour
         }
         foreach (MapTile tile in mapGrid)
         {
-            Instantiate(connectionData.mapTilePrefabs[tile.tileID], tile.position, Quaternion.identity);
+            //all of these damn calculations are with the assumption that z is the "up" vector and x-y are in a 2D space, but i forgot thast unity doesnt do that
+            Instantiate(connectionData.mapTilePrefabs[tile.tileID], new Vector3(tile.gridPosition.x * tileSize, 0, tile.gridPosition.y * tileSize), Quaternion.identity);
         }
         
     }
@@ -77,7 +78,9 @@ public class WFCMap : MonoBehaviour
     {
         int tileIndex = Random.Range(0, tile.tilePossibilities.Count - 1);
         int prefabID = tile.tilePossibilities[tileIndex];
+        Vector2 gridPos = tile.gridPosition;
         tile = connectionData.mapTilePrefabs[prefabID].GetComponent<MapTile>();
+        tile.setGridPosition(gridPos);
         return tile;
     }
 
