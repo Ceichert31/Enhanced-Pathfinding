@@ -5,6 +5,7 @@ using UnityEngine;
 public class MapTile : MonoBehaviour
 {
     //front, back, left, right sockets for sorting
+    public Vector2 gridPosition;
     public int frontSocket;
     public int backSocket;
     public int leftSocket;
@@ -14,7 +15,10 @@ public class MapTile : MonoBehaviour
     public List<int> backConnections;
     public List<int> leftConnections;
     public List<int> rightConnections;
+    public int tileID; //used for organization within connectionData instead of storing prefabs
     // Start is called before the first frame update
+    public List<int> tilePossibilities;
+    public bool collapsed = false;
     void Start()
     {
         
@@ -26,35 +30,54 @@ public class MapTile : MonoBehaviour
 
     }
 
-    public int getSockets(int choice)
+    public int GetSockets(int choice)
     {
         switch (choice)
         {
             case 1:
                 return frontSocket;
             case 2:
-                return rightSocket;
-            case 3:
                 return backSocket;
-            case 4:
+            case 3:
                 return leftSocket;
+            case 4:
+                return rightSocket;
         }
         return 0;
     }
 
-    public int getConnections(int choice)
+    public int GetConnections(int choice)
     {
         switch (choice)
         {
             case 1:
                 return frontConnections.Count;
             case 2:
-                return rightConnections.Count;
-            case 3:
                 return backConnections.Count;
-            case 4:
+            case 3:
                 return leftConnections.Count;
+            case 4:
+                return rightConnections.Count;
         }
         return 0;
+    }
+
+    public void Reset()
+    {
+        tileID = 0;
+        collapsed = false;
+        frontSocket = 0;
+        backSocket = 0;
+        leftSocket = 0;
+        rightSocket = 0;
+        frontConnections.Clear();
+        backConnections.Clear();
+        leftConnections.Clear();
+        rightConnections.Clear();
+    }
+
+    public void setGridPosition(Vector2 gridPos)
+    {
+        gridPosition = gridPos;
     }
 }
