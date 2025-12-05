@@ -83,6 +83,7 @@ public class WFCMap : MonoBehaviour
         int prefabID = tile.tilePossibilities[tileIndex];
         Vector2 gridPos = tile.gridPosition;
         tile = connectionData.mapTilePrefabs[prefabID].GetComponent<MapTile>();
+        tile.collapsed = true;
         tile.setGridPosition(gridPos);
         return tile;
     }
