@@ -5,6 +5,7 @@ using UnityEngine;
 public class MapTile : MonoBehaviour
 {
     //front, back, left, right sockets for sorting
+    Vector3 position;
     public int frontSocket;
     public int backSocket;
     public int leftSocket;
@@ -20,7 +21,7 @@ public class MapTile : MonoBehaviour
     bool collapsed = false;
     void Start()
     {
-        
+        position = transform.position;
     }
 
     // Update is called once per frame
@@ -36,11 +37,11 @@ public class MapTile : MonoBehaviour
             case 1:
                 return frontSocket;
             case 2:
-                return rightSocket;
-            case 3:
                 return backSocket;
-            case 4:
+            case 3:
                 return leftSocket;
+            case 4:
+                return rightSocket;
         }
         return 0;
     }
@@ -52,11 +53,11 @@ public class MapTile : MonoBehaviour
             case 1:
                 return frontConnections.Count;
             case 2:
-                return rightConnections.Count;
-            case 3:
                 return backConnections.Count;
-            case 4:
+            case 3:
                 return leftConnections.Count;
+            case 4:
+                return rightConnections.Count;
         }
         return 0;
     }

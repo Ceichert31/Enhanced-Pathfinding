@@ -40,7 +40,7 @@ public class WFCMap : MonoBehaviour
 
             if(tileStack.Count != 0 && tileStack.Peek().tilePossibilities.Count != 0)
             {
-                //backtrack
+                tileStack = backtrackStack(tileStack);
             }
         }
         
