@@ -23,10 +23,9 @@ public class WFCMap : MonoBehaviour
         {
             for (int x = 0; x < mapSize; x++)
             {   
-                mapGrid[x, y] = connectionData.emptyTile.GetComponent<MapTile>();
-                mapGrid[x, y].gridPosition.x = x;
-                mapGrid[x, y].gridPosition.y = y;
-                mapGrid[x, y].tilePossibilities = connectionData.standardSet;
+                mapGrid[x, y] = new MapTile();
+                mapGrid[x, y].gridPosition = new Vector2(x, y);
+                mapGrid[x, y].tilePossibilities = new List<int>(connectionData.standardSet);
             }
         }
         //collapse tile to start

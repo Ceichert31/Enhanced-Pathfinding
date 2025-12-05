@@ -260,8 +260,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ed895d89a4e3e4d82ebc03a06c4276, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileSize: 0
-  mapSize: 0
+  tileSize: 5
+  mapSize: 5
   connectionData: {fileID: 610424233}
   run: 0
   current: {fileID: 0}
@@ -287,7 +287,7 @@ MonoBehaviour:
   - {fileID: 8624734689881007873, guid: 06a15fa72f4717b4796be748a18f25b1, type: 3}
   - {fileID: 6514635000267718358, guid: 7612c9aca32af7a47b9d4ef302710c39, type: 3}
   - {fileID: 7638040959495966953, guid: 24db4a73ecd4b2c4ca98c183f9e29eed, type: 3}
-  emptyTile: {fileID: 7809811162386975428, guid: 9bc64e0d45fec764ab7121e4187f9a20, type: 3}
+  emptyTile: {fileID: 1734706619013413341, guid: 196cddf524123b3458ab9719360e52f5, type: 3}
   standardSet: 
   upSet1: 
   upSet2: 
