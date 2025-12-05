@@ -90,11 +90,11 @@ public class NavmeshGeneration : MonoBehaviour
                 //Check for obstacle layer
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
                 {
-                    if (hitInfo.collider.gameObject.CompareTag("obstacle"))
+                  /*  if (hitInfo.collider.gameObject.CompareTag("obstacle"))
                     {
                         AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
                         continue;
-                    }
+                    }*/
 
                     //Set cost as the height of the point of contact
                     AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
@@ -228,11 +228,12 @@ public class NavmeshGeneration : MonoBehaviour
             if (point == null || neighborPoint == null) return;
 
             //Check if wall blocks the connection
-            if (Physics.Linecast(point.Position + Vector3.up,
-                                neighborPoint.Position + Vector3.up,
+            if (Physics.Linecast(point.Position + Vector3.up * 0.1f,
+                                neighborPoint.Position + Vector3.up * 0.1f, out RaycastHit info,
                                 hitLayer))
             {
-                return;
+                if (info.transform.gameObject.CompareTag("obstacle"))
+                    return;
             }
 
             //Add neighbor to connections list

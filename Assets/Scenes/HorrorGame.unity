@@ -422,6 +422,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RoomNode (16)
       objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
 --- !u!4 &48729546 stripped
@@ -720,6 +724,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Stair (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1120122031127206031, guid: 98ab3af88c8d357469f144f0ff97827e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 98ab3af88c8d357469f144f0ff97827e, type: 3}
 --- !u!1001 &138493276
@@ -872,6 +880,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (24)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
@@ -1671,6 +1683,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RoomNode (20)
       objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
 --- !u!4 &405691675 stripped
@@ -1815,6 +1831,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (27)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
@@ -2009,6 +2029,83 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 563963222}
   m_CullTransparentMesh: 1
+--- !u!1001 &581502096
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_RootOrder
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -8
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380552220576810245, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2185397408782079305, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5973758991608772421, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5973758991735602261, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5973758993543135384, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_Name
+      value: RoomNode (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6847458485617284866, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
 --- !u!1001 &599271760
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2075,6 +2172,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (29)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
@@ -4464,6 +4565,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RoomNode (28)
       objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
 --- !u!4 &1226361723 stripped
@@ -4611,6 +4716,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RoomNode (23)
       objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
 --- !u!4 &1294758360 stripped
@@ -4673,6 +4782,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5973758991735602261, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5973758991735602261, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_TagString
+      value: obstacle
+      objectReference: {fileID: 0}
     - target: {fileID: 5973758993415338032, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -4684,6 +4801,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (26)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
@@ -4824,6 +4945,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (19)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
@@ -5105,6 +5230,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RoomNode (22)
       objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
 --- !u!4 &1413991784 stripped
@@ -5178,6 +5307,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (21)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
@@ -5610,6 +5743,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (25)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
@@ -6215,6 +6352,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RoomNode (18)
       objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
 --- !u!4 &1579215928 stripped
@@ -6737,6 +6878,10 @@ PrefabInstance:
     - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
       propertyPath: m_Name
       value: RoomNode (17)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753388069129108869, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6e2e7fd037099b40abc229d08526159, type: 3}
