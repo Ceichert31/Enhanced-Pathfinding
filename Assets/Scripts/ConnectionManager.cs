@@ -24,7 +24,6 @@ public class ConnectionManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /* //debug scenario
         if (run)
         {
             //make a way to even chack for the first 'check' square
@@ -36,13 +35,12 @@ public class ConnectionManager : MonoBehaviour
             }
             run = false;
         }
-        */
     }
 
-    List<int> check(MapTile checkedObject)
+    List<GameObject> check(GameObject checkedObject)
     {
-        List<int> possibilities = new List<int>();
-        if (checkedObject.GetSockets(1) == 0)//checks up
+        List<GameObject> chooseFrom = new List<GameObject>();
+        if (checkedObject.GetComponent<MapTile>().GetSockets(1) == 0)//checks up
         {
             if (checkedObject.GetComponent<MapTile>().GetConnections(1) == 0)
             {

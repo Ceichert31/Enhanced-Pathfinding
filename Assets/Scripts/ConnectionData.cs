@@ -7,10 +7,11 @@ public class ConnectionData : MonoBehaviour
     //SOCKET LIST !!! -----------
     //
     // 0 = NULL - USED FOR UNCOLLAPSED TILES
-    // 1 = AIR - USED FOR AIR SPACE SOCKETS
+    // 1 = AIR - USED FOR OUTDOOR SPACE SOCKETS
     // 2 = WALL - USED FOR FULLY BLOCKED SOCKETS
     //
     // --------------------------
+    //adjust as needed for more socket types, like indoor air
     public List<GameObject> mapTilePrefabs;
 
     //lists of all possible sets of connections
@@ -84,6 +85,55 @@ public class ConnectionData : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+    
+    public List<int> retrieveSet(int direction, int socket)
+    {
+        if (direction == 1) // up
+        {
+            if (socket == 1)
+            {
+                return upSet1;
+            }
+            if(socket == 2)
+            {
+                return upSet2;
+            }
+        }
+        if (direction == 2) // down
+        {
+            if (socket == 1)
+            {
+                return downSet1;
+            }
+            if(socket == 2)
+            {
+                return downSet2;
+            }
+        }
+        if (direction == 3) // left
+        {
+            if (socket == 1)
+            {
+                return leftSet1;
+            }
+            if(socket == 2)
+            {
+                return leftSet2;
+            }
+        }
+        if (direction == 4) // right
+        {
+            if (socket == 1)
+            {
+                return rightSet1;
+            }
+            if (socket == 2)
+            {
+                return rightSet2;
+            }
+        }
+        return standardSet;
     }
 }

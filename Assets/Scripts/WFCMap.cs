@@ -22,12 +22,14 @@ public class WFCMap : MonoBehaviour
         {
             for (int x = 0; x < mapSize; x++)
             {
+                mapGrid[x, y].gridPosition.x = x;
+                mapGrid[x, y].gridPosition.y = y;
                 mapGrid[x, y].tilePossibilities = connectionData.standardSet;
             }
         }
         //collapse tile to start
         Stack<MapTile> tileStack = new();
-        while(true)
+        while (true)
         {
             MapTile currentTile = findLowestEntropy(mapGrid);
             if (currentTile == null) break;
@@ -37,11 +39,16 @@ public class WFCMap : MonoBehaviour
             tileStack.Push(currentTile);
 
             //check constraints
+            propagateNeighbors(getNeighbors(currentTile, mapGrid), mapGrid);
 
-            if(tileStack.Count != 0 && tileStack.Peek().tilePossibilities.Count != 0)
+            if (tileStack.Count != 0 && tileStack.Peek().tilePossibilities.Count != 0)
             {
                 tileStack = backtrackStack(tileStack);
             }
+        }
+        foreach (MapTile tile in mapGrid)
+        {
+            Instantiate(connectionData.mapTilePrefabs[tile.tileID], tile.position, Quaternion.identity);
         }
         
     }
@@ -73,7 +80,7 @@ public class WFCMap : MonoBehaviour
         tile = connectionData.mapTilePrefabs[prefabID].GetComponent<MapTile>();
         return tile;
     }
-    
+
     Stack<MapTile> backtrackStack(Stack<MapTile> stack)
     {
         while (stack.Count > 0)
@@ -83,6 +90,91 @@ public class WFCMap : MonoBehaviour
             top.Reset();
         }
         return stack;
+    }
+
+    List<MapTile> getNeighbors(MapTile tile, MapTile[,] grid)
+    {
+        List<MapTile> neighbors = new List<MapTile>();
+        if (tile.gridPosition.x != 0)
+        {
+            neighbors.Add(grid[(int)(tile.gridPosition.x - 1), (int)tile.gridPosition.y]);
+        }
+        if (tile.gridPosition.x != grid.GetLength(0) - 1)
+        {
+            neighbors.Add(grid[(int)(tile.gridPosition.x + 1), (int)tile.gridPosition.y]);
+        }
+        if (tile.gridPosition.y != 0)
+        {
+            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y - 1)]);
+        }
+        if (tile.gridPosition.y != grid.GetLength(1) - 1)
+        {
+            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y + 1)]);
+        }
+        return neighbors;
+    }
+    
+    //takes the neighbors of a tile, checks each of their neighbors, combines all lists of connections and reduces down to final possibilities
+    void propagateNeighbors(List<MapTile> neighbors, MapTile[,] grid)
+    {
+        foreach(MapTile tile in neighbors) //each neighbor tile
+        {
+            tile.tilePossibilities.Clear(); //clear possibilities to replace
+            List<MapTile> tileNeighbors = getNeighbors(tile, grid);//find each neighbor of new tile
+            int collapseNum = 0;
+            foreach (MapTile collapseCheck in tileNeighbors) //fill possibilities with all of the possible connections
+            { 
+                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.y == tile.gridPosition.y - 1) //if newtile is below a collapsed tile
+                {
+                    collapseNum++;
+                    foreach (int socketType in collapseCheck.backConnections)
+                    {
+                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(2, socketType));
+                    }
+                }
+                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.y == tile.gridPosition.y + 1) //if newtile is above a collapsed tile
+                {
+                    collapseNum++;
+                    foreach (int socketType in collapseCheck.backConnections)
+                    {
+                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(1, socketType));
+                    }
+                }
+                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.x == tile.gridPosition.x - 1) //if newtile is to the right of a collapsed tile
+                {
+                    collapseNum++;
+                    foreach (int socketType in collapseCheck.backConnections)
+                    {
+                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(4, socketType));
+                    }
+                }
+                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.x == tile.gridPosition.x + 1) //if newtile is to the left of a collapsed tile
+                {
+                    collapseNum++;
+                    foreach (int socketType in collapseCheck.backConnections)
+                    {
+                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(3, socketType));
+                    }
+                }
+            }
+            //tilepossibilities is filled out with duplicate data - we only want a tile that has been repeated the number of times it has been checked by a collapsed tile
+            List<int> finalList = new();
+            for (int i = 0; i < tile.tilePossibilities.Count; i++)
+            {
+                int possibilityCount = 0;
+                for (int j = 0; j < tile.tilePossibilities.Count; j++)
+                {
+                    if (tile.tilePossibilities[j] == tile.tilePossibilities[i])
+                        possibilityCount++;
+                }
+                if (possibilityCount == collapseNum)
+                {
+                    finalList.Add(tile.tilePossibilities[i]);
+                }
+            }
+            //finally set the new list of possibilities to the focused neighboring tile
+            tile.tilePossibilities = finalList;
+        }
     }
 
 }

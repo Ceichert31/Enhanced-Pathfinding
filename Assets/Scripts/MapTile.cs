@@ -5,7 +5,8 @@ using UnityEngine;
 public class MapTile : MonoBehaviour
 {
     //front, back, left, right sockets for sorting
-    Vector3 position;
+    public Vector3 position;
+    public Vector2 gridPosition;
     public int frontSocket;
     public int backSocket;
     public int leftSocket;
@@ -18,7 +19,7 @@ public class MapTile : MonoBehaviour
     public int tileID; //used for organization within connectionData instead of storing prefabs
     // Start is called before the first frame update
     public List<int> tilePossibilities;
-    bool collapsed = false;
+    public bool collapsed = false;
     void Start()
     {
         position = transform.position;
