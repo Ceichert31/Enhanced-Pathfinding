@@ -13,6 +13,7 @@ public class ConnectionData : MonoBehaviour
     // --------------------------
     //adjust as needed for more socket types, like indoor air
     public List<GameObject> mapTilePrefabs;
+    public GameObject emptyTile;
 
     //lists of all possible sets of connections
     public List<int> standardSet;
@@ -31,7 +32,7 @@ public class ConnectionData : MonoBehaviour
     public List<int> rightSet2;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         for(int i = 0; i < mapTilePrefabs.Count; i++)
         {

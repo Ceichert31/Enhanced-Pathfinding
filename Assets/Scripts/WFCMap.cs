@@ -17,11 +17,13 @@ public class WFCMap : MonoBehaviour
     void Start()
     {
         mapGrid = new MapTile[mapSize, mapSize];
+        
         //initialize grid with all possibilities
         for (int y = 0; y < mapSize; y++)
         {
             for (int x = 0; x < mapSize; x++)
-            {
+            {   
+                mapGrid[x, y] = connectionData.emptyTile.GetComponent<MapTile>();
                 mapGrid[x, y].gridPosition.x = x;
                 mapGrid[x, y].gridPosition.y = y;
                 mapGrid[x, y].tilePossibilities = connectionData.standardSet;
@@ -51,7 +53,6 @@ public class WFCMap : MonoBehaviour
             //all of these damn calculations are with the assumption that z is the "up" vector and x-y are in a 2D space, but i forgot thast unity doesnt do that
             Instantiate(connectionData.mapTilePrefabs[tile.tileID], new Vector3(tile.gridPosition.x * tileSize, 0, tile.gridPosition.y * tileSize), Quaternion.identity);
         }
-        
     }
 
     //finds a tile with the lowest entropy in a list
@@ -59,11 +60,12 @@ public class WFCMap : MonoBehaviour
     {
         MapTile minCell = null;
         int minEntropy = int.MaxValue;
-        for (int x = 0; x < mapGrid.Length; x++)
+        for (int x = 0; x < mapSize - 1; x++)
         {
-            for (int y = 0; y < mapGrid.Length; y++)
+            for (int y = 0; y < mapSize - 1; y++)
             {
                 int entropy = mapGrid[x, y].tilePossibilities.Count;
+                Debug.Log("" + entropy);
                 if (entropy > 1 && entropy < minEntropy)
                 {
                     minEntropy = entropy;
@@ -71,6 +73,7 @@ public class WFCMap : MonoBehaviour
                 }
             }
         }
+        Debug.Log("" + minCell);
         return minCell;
     }
 
@@ -101,18 +104,22 @@ public class WFCMap : MonoBehaviour
         if (tile.gridPosition.x != 0)
         {
             neighbors.Add(grid[(int)(tile.gridPosition.x - 1), (int)tile.gridPosition.y]);
+            Debug.Log("x inner edge");
         }
         if (tile.gridPosition.x != grid.GetLength(0) - 1)
         {
             neighbors.Add(grid[(int)(tile.gridPosition.x + 1), (int)tile.gridPosition.y]);
+            Debug.Log("x outer edge");
         }
         if (tile.gridPosition.y != 0)
         {
             neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y - 1)]);
+            Debug.Log("y inner edge");
         }
         if (tile.gridPosition.y != grid.GetLength(1) - 1)
         {
             neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y + 1)]);
+            Debug.Log("y outer edge");
         }
         return neighbors;
     }
@@ -124,9 +131,11 @@ public class WFCMap : MonoBehaviour
         {
             tile.tilePossibilities.Clear(); //clear possibilities to replace
             List<MapTile> tileNeighbors = getNeighbors(tile, grid);//find each neighbor of new tile
+            Debug.Log("tNeighbors: " + tileNeighbors);
             int collapseNum = 0;
             foreach (MapTile collapseCheck in tileNeighbors) //fill possibilities with all of the possible connections
-            { 
+            {
+                Debug.Log("neighbors neighbor run through");
                 if (collapseCheck.collapsed == true && collapseCheck.gridPosition.y == tile.gridPosition.y - 1) //if newtile is below a collapsed tile
                 {
                     collapseNum++;
@@ -170,12 +179,17 @@ public class WFCMap : MonoBehaviour
                     if (tile.tilePossibilities[j] == tile.tilePossibilities[i])
                         possibilityCount++;
                 }
-                if (possibilityCount == collapseNum)
+                Debug.Log("" + possibilityCount + " >= " + collapseNum);
+                if (possibilityCount >= collapseNum)
                 {
                     finalList.Add(tile.tilePossibilities[i]);
                 }
             }
             //finally set the new list of possibilities to the focused neighboring tile
+            foreach (int i in finalList)
+            {
+                Debug.Log("[" + tile.gridPosition.x + " , " + tile.gridPosition.y + "] list element: " + i);
+            }
             tile.tilePossibilities = finalList;
         }
     }
