@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 public class NavmeshGeneration : MonoBehaviour
 {
-    public Dictionary<Vector2, List<TerrainData>> navMeshGrid = new();
+    public Dictionary<Vector2, HashSet<TerrainData>> navMeshGrid = new();
 
     [SerializeField]
     private Vector2 minBound;
@@ -22,9 +22,6 @@ public class NavmeshGeneration : MonoBehaviour
     [SerializeField]
     private bool enableDebug;
 
-    [Range(3f, 5f)]
-    [SerializeField]
-    private int debugResolution = 5;
     [Range(1, 5)]
     [SerializeField]
     private int raycastLevels = 3;
@@ -37,20 +34,13 @@ public class NavmeshGeneration : MonoBehaviour
     private bool enableDiagonals = true;
 
     [SerializeField]
-    private GameObject debugPrefab;
-    [SerializeField]
     private GameObject obstaclePrefab;
-
-    [SerializeField]
-    private Transform debugParent;
 
     [SerializeField]
     private Transform obstacleParent;
 
-    private Dictionary<Vector2, GameObject> debugGrid = new();
-
     private const float NAVMESH_HEIGHT = 100.0f;
-    private const float DIAGONAL_COST = 1f;
+    private const float DIAGONAL_COST = 1.5f;
     public float NavmeshHeight { get { return NAVMESH_HEIGHT; } }
     public Vector2 MinimumBoundary => minBound;
     public Vector2 MaximumBoundary => maxBound;
@@ -64,20 +54,6 @@ public class NavmeshGeneration : MonoBehaviour
     /// </summary>
     private void GenerateNavMesh()
     {
-        //Clear old debug objects
-        for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
-        {
-            for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
-            {
-                if (debugGrid.TryGetValue(new Vector2(i, j), out GameObject debugObject))
-                {
-                    Destroy(debugObject);
-                }
-            }
-        }
-
-        //Clear old navmesh
-        debugGrid.Clear();
         navMeshGrid.Clear();
 
         //Ray-cast and generate navmesh
@@ -90,14 +66,10 @@ public class NavmeshGeneration : MonoBehaviour
                 //Check for obstacle layer
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
                 {
-                  /*  if (hitInfo.collider.gameObject.CompareTag("obstacle"))
-                    {
-                        AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), 0, false));
-                        continue;
-                    }*/
-
                     //Set cost as the height of the point of contact
                     AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
+
+                    //Keep casting downwards until we hit raycast levels
                     RecursiveCast(hitInfo.point, raycastLevels, key);
                 }
             }
@@ -110,7 +82,7 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 Vector2 key = new(i, j);
 
-                if (navMeshGrid.TryGetValue(key, out List<TerrainData> dataList))
+                if (navMeshGrid.TryGetValue(key, out HashSet<TerrainData> dataList))
                 {
                     foreach (var point in dataList)
                     {
@@ -119,9 +91,6 @@ public class NavmeshGeneration : MonoBehaviour
                 }
             }
         }
-
-        //Add debug visuals
-        EnableDebugMode();
     }
 
     /// <summary>
@@ -138,6 +107,16 @@ public class NavmeshGeneration : MonoBehaviour
             if (Mathf.Abs(castOrigin.y - hitInfo.point.y) < maxTraversableHeight)
                 return;
 
+            //If debug is enabled, draw current cast and wait for button press to continue
+            if (enableDebug)
+            {
+                while (!Input.GetKeyDown(KeyCode.R))
+                {
+                    Debug.DrawLine(castOrigin, hitInfo.point, Color.blue);
+                    return;
+                }
+            }
+
             //Set cost as the height of the point of contact
             AddToNavmesh(key, new TerrainData(new(key.x, hitInfo.point.y, key.y), hitInfo.point.y, true));
             RecursiveCast(hitInfo.point, --castsLeft, key);
@@ -152,14 +131,14 @@ public class NavmeshGeneration : MonoBehaviour
     private void AddToNavmesh(Vector2 key, TerrainData data)
     {
         //Get list of data to add to end of
-        if (navMeshGrid.TryGetValue(key, out List<TerrainData> list))
+        if (navMeshGrid.TryGetValue(key, out HashSet<TerrainData> list))
         {
             list.Add(data);
         }
         //Otherwise, add new list of data
         else
         {
-            List<TerrainData> newData = new();
+            HashSet<TerrainData> newData = new();
             newData.Add(data);
             navMeshGrid.Add(key, newData);
         }
@@ -240,57 +219,6 @@ public class NavmeshGeneration : MonoBehaviour
             point.GetConnections().Add(neighborKey);
         }
     }
-
-    /// <summary>
-    /// Shows a debug visual of the navmesh
-    /// </summary>
-    public void EnableDebugMode()
-    {
-        if (enableDebug)
-        {
-            for (int i = (int)minBound.x; i < maxBound.x; i += 1)
-            {
-                for (int j = (int)minBound.y; j < maxBound.y; j += 1)
-                {
-                    Vector2 key = new(i, j);
-
-                    if (!navMeshGrid.TryGetValue(key, out var pointList))
-                        continue;
-
-                    foreach (var point in pointList)
-                    {
-                        if (point == null) continue;
-
-                        if (Vector3.Distance(Camera.main.transform.position, point.Position) > 8)
-                            continue;
-
-                        if (!point.IsWalkable)
-                        {
-                            continue;
-                        }
-
-                        debugGrid.TryAdd(key, Instantiate(debugPrefab, point.Position, Quaternion.identity, debugParent));
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (int i = (int)minBound.x; i < maxBound.x; i += debugResolution)
-            {
-                for (int j = (int)minBound.y; j < maxBound.y; j += debugResolution)
-                {
-                    Vector2 key = new(i, j);
-                    if (debugGrid.TryGetValue(key, out GameObject debugObject))
-                    {
-                        Destroy(debugObject);
-                        debugGrid.Remove(key);
-                    }
-                }
-            }
-        }
-    }
-
     /// <summary>
     /// Adds a random obstacle to the navmesh
     /// </summary>
@@ -319,7 +247,7 @@ public class NavmeshGeneration : MonoBehaviour
     /// <param name="key"></param>
     public TerrainData GetNavmeshValue(Vector2 key, float level)
     {
-        if (navMeshGrid.TryGetValue(key, out List<TerrainData> terrainDataAtThisPoint))
+        if (navMeshGrid.TryGetValue(key, out HashSet<TerrainData> terrainDataAtThisPoint))
         {
             TerrainData closest = null;
             float distance = Mathf.Infinity;
@@ -375,7 +303,7 @@ public class NavmeshGeneration : MonoBehaviour
             {
                 Vector2 key = new(i, j);
 
-                if (!navMeshGrid.TryGetValue(key, out List<TerrainData> data))
+                if (!navMeshGrid.TryGetValue(key, out HashSet<TerrainData> data))
                     continue;
 
                 foreach (var point in data)

@@ -6561,7 +6561,7 @@ MonoBehaviour:
   hitLayer:
     serializedVersion: 2
     m_Bits: 64
-  enableDebug: 0
+  enableDebug: 1
   debugResolution: 3
   raycastLevels: 3
   maxTraversableHeight: 1
