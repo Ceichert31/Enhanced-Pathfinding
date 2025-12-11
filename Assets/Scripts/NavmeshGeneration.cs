@@ -9,7 +9,7 @@ public class NavmeshGeneration : MonoBehaviour
 
     [SerializeField]
     private Vector2 minBound;
-    [SerializeField]
+    [SerializeField]    
     private Vector2 maxBound;
     [SerializeField]
     private int obstacleLayer;
@@ -106,16 +106,6 @@ public class NavmeshGeneration : MonoBehaviour
         {
             if (Mathf.Abs(castOrigin.y - hitInfo.point.y) < maxTraversableHeight)
                 return;
-
-            //If debug is enabled, draw current cast and wait for button press to continue
-            if (enableDebug)
-            {
-                while (!Input.GetKeyDown(KeyCode.R))
-                {
-                    Debug.DrawLine(castOrigin, hitInfo.point, Color.blue);
-                    return;
-                }
-            }
 
             //Set cost as the height of the point of contact
             AddToNavmesh(key, new TerrainData(new(key.x, hitInfo.point.y, key.y), hitInfo.point.y, true));
