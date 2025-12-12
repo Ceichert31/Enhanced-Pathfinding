@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 
 public class WFCMap : MonoBehaviour
@@ -24,7 +25,7 @@ public class WFCMap : MonoBehaviour
             {   
                 mapGrid[x, y] = connectionData.emptyTile.GetComponent<MapTile>();
                 mapGrid[x, y].gridPosition = new Vector2(x, y);
-                mapGrid[x, y].tilePossibilities = new List<int>(connectionData.standardSet);
+                mapGrid[x, y].tilePossibilities = connectionData.standardSet;
             }
         }
         //collapse tile to start
@@ -49,7 +50,7 @@ public class WFCMap : MonoBehaviour
         foreach (MapTile tile in mapGrid)
         {
             //all of these damn calculations are with the assumption that z is the "up" vector and x-y are in a 2D space, but i forgot thast unity doesnt do that
-            Instantiate(connectionData.mapTilePrefabs[tile.tileID], new Vector3(tile.gridPosition.x * tileSize, 0, tile.gridPosition.y * tileSize), Quaternion.identity);
+            Instantiate(connectionData.mapTilePrefabs.Find(x => x.GetComponent<MapTile>() == tile.collapsedTile), new Vector3(tile.gridPosition.x * tileSize, 0, tile.gridPosition.y * tileSize), Quaternion.identity);
         }
     }
 
@@ -78,10 +79,9 @@ public class WFCMap : MonoBehaviour
     MapTile collapseRandomTile(MapTile tile)
     {
         int tileIndex = Random.Range(0, tile.tilePossibilities.Count - 1);
-        Debug.Log("tile possibilities: " + tile.tilePossibilities.Count + " random tile index: " + tileIndex);
-        int prefabID = tile.tilePossibilities[tileIndex];
+        //Debug.Log("tile possibilities: " + tile.tilePossibilities.Count + " random tile index: " + tileIndex);
         Vector2 gridPos = tile.gridPosition;
-        tile = connectionData.mapTilePrefabs[prefabID].GetComponent<MapTile>();
+        tile.collapsedTile = tile.tilePossibilities[tileIndex];
         tile.collapsed = true;
         tile.setGridPosition(gridPos);
         return tile;
@@ -91,7 +91,9 @@ public class WFCMap : MonoBehaviour
     {
         while (stack.Count > 0)
         {
-            MapTile top = stack.Pop();
+            MapTile top = stack.Peek();
+            stack.Pop();
+
             top.tilePossibilities = connectionData.standardSet;
             top.Reset();
         }
@@ -125,7 +127,7 @@ public class WFCMap : MonoBehaviour
     }
     
     //takes the neighbors of a tile, checks each of their neighbors, combines all lists of connections and reduces down to final possibilities
-    void propagateNeighbors(List<MapTile> neighbors, MapTile[,] grid)
+    /*void propagateNeighbors(List<MapTile> neighbors, MapTile[,] grid)
     {
         foreach(MapTile tile in neighbors) //each neighbor tile
         {
@@ -191,6 +193,31 @@ public class WFCMap : MonoBehaviour
                 Debug.Log("[" + tile.gridPosition.x + " , " + tile.gridPosition.y + "] list element: " + i);
             }
             tile.tilePossibilities = finalList;
+        }
+    }*/
+
+    void propagateNeighbors(MapTile tile, MapTile[,] grid, Stack<MapTile> backtrackStack)
+    {
+        List<MapTile> neighbors = new List<MapTile>();
+        if (tile.gridPosition.x != 0) //tile to left
+        {
+            neighbors.Add(grid[(int)(tile.gridPosition.x - 1), (int)tile.gridPosition.y]);
+            for (int i = 0; i < grid[(int)tile.gridPosition.x - 1, (int)tile.gridPosition.y].tilePossibilities.Count; i++)
+            {
+                if(tile.leftConnections.Find(grid[(int)tile.gridPosition.x - 1, (int)tile.gridPosition.y].tilePossibilities))
+            }
+        }
+        if (tile.gridPosition.x != grid.GetLength(0) - 1) //tile to right
+        {
+            neighbors.Add(grid[(int)(tile.gridPosition.x + 1), (int)tile.gridPosition.y]);
+        }
+        if (tile.gridPosition.y != 0) //tile to down
+        {
+            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y - 1)]);
+        }
+        if (tile.gridPosition.y != grid.GetLength(1) - 1) //tile to up
+        {
+            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y + 1)]);
         }
     }
 
