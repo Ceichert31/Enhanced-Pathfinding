@@ -9,7 +9,9 @@ public class ConnectionData : MonoBehaviour
     // 0 = NULL - USED FOR UNCOLLAPSED TILES
     // 1 = AIR - USED FOR OUTDOOR SPACE SOCKETS
     // 2 = WALL - USED FOR FULLY BLOCKED SOCKETS
-    //
+    // --------------- stair -----------------
+    // 3 -> 4 -> 5 -> 6
+    //bottom tile should start with 1 and 3 at opposite ends, then each stai goes through 3 ->4, 4->5, 5->6, 6->1
     // --------------------------
     //adjust as needed for more socket types, like indoor air
     public List<GameObject> mapTilePrefabs;

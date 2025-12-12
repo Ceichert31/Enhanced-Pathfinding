@@ -292,8 +292,8 @@ public class WFCMap : MonoBehaviour
                     if (prefab != null)
                     {
                         Instantiate(prefab,
-                            new Vector3(x * tileSize, 0, y * tileSize),
-                            prefab.transform.rotation,
+                            new Vector3(x * tileSize, prefab.transform.position.y, y * tileSize),
+                            Quaternion.Inverse(prefab.transform.rotation),
                             transform);
                     }
                 }
