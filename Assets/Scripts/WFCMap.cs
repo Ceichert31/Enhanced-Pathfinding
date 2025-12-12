@@ -1,227 +1,275 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 
 public class WFCMap : MonoBehaviour
 {
-    public int tileSize; //dimension of a tile, given that the tile is square
-    public int mapSize; //dimension of the map, for a map of size (mapsize X mapsize)
+    public int tileSize;
+    public int mapSize; 
     [SerializeField] ConnectionManager connectionManager;
     [SerializeField] ConnectionData connectionData;
 
-    public MapTile[,] mapGrid; //grid of tiles, coordinates (x,y)
+    public MapTile[,] mapGrid;
 
-
-    // Start is called before the first frame update
     void Start()
     {
+        GenerateMap();
+    }
+
+    void GenerateMap()
+    {
         mapGrid = new MapTile[mapSize, mapSize];
-        
+
         //initialize grid with all possibilities
         for (int y = 0; y < mapSize; y++)
         {
             for (int x = 0; x < mapSize; x++)
-            {   
-                mapGrid[x, y] = connectionData.emptyTile.GetComponent<MapTile>();
+            {
+                mapGrid[x, y] = new MapTile(); // Create new instance for each cell
                 mapGrid[x, y].gridPosition = new Vector2(x, y);
-                mapGrid[x, y].tilePossibilities = connectionData.standardSet;
+                mapGrid[x, y].tilePossibilities = new List<MapTile>(connectionData.standardSet);
+                mapGrid[x, y].collapsed = false;
             }
         }
-        //collapse tile to start
-        Stack<MapTile> tileStack = new();
+
+        // Wave Function Collapse main loop
         while (true)
         {
-            MapTile currentTile = findLowestEntropy(mapGrid);
-            if (currentTile == null) break;
-
-            currentTile = collapseRandomTile(currentTile);
-
-            tileStack.Push(currentTile);
-
-            //check constraints
-            //propagateNeighbors(getNeighbors(currentTile, mapGrid), mapGrid);
-
-            if (tileStack.Count != 0 && tileStack.Peek().tilePossibilities.Count != 0)
+            // Find tile with lowest entropy
+            MapTile currentTile = FindLowestEntropy();
+            if (currentTile == null)
             {
-                tileStack = backtrackStack(tileStack);
+                // All tiles collapsed successfully!
+                break;
+            }
+
+            // Collapse the tile
+            if (!CollapseTile(currentTile))
+            {
+                Debug.LogError("Failed to collapse tile - no valid possibilities!");
+                break;
+            }
+
+            // Propagate constraints to neighbors
+            if (!PropagateConstraints(currentTile))
+            {
+                Debug.LogError("Contradiction detected during propagation!");
+                // In a full implementation, you'd backtrack here
+                break;
             }
         }
-        foreach (MapTile tile in mapGrid)
-        {
-            //all of these damn calculations are with the assumption that z is the "up" vector and x-y are in a 2D space, but i forgot thast unity doesnt do that
-            Instantiate(connectionData.mapTilePrefabs.Find(x => x.GetComponent<MapTile>() == tile.collapsedTile), new Vector3(tile.gridPosition.x * tileSize, 0, tile.gridPosition.y * tileSize), Quaternion.identity);
-        }
+
+        // Instantiate the final map
+        InstantiateMap();
     }
 
-    //finds a tile with the lowest entropy in a list
-    MapTile findLowestEntropy(MapTile[,] mapGrid)
+    MapTile FindLowestEntropy()
     {
         MapTile minCell = null;
         int minEntropy = int.MaxValue;
-        for (int x = 0; x < mapSize - 1; x++)
+
+        // Fixed: Check all cells including edges
+        for (int x = 0; x < mapSize; x++)
         {
-            for (int y = 0; y < mapSize - 1; y++)
+            for (int y = 0; y < mapSize; y++)
             {
+                if (mapGrid[x, y].collapsed) continue;
+
                 int entropy = mapGrid[x, y].tilePossibilities.Count;
-                //Debug.Log("" + entropy);
-                if (entropy > 1 && entropy < minEntropy)
+
+                if (entropy == 0)
+                {
+                    // Contradiction - this shouldn't happen in a working WFC
+                    return null;
+                }
+
+                if (entropy < minEntropy)
                 {
                     minEntropy = entropy;
                     minCell = mapGrid[x, y];
                 }
             }
         }
-        //Debug.Log("" + minCell);
+
         return minCell;
     }
 
-    MapTile collapseRandomTile(MapTile tile)
+    bool CollapseTile(MapTile tile)
     {
-        int tileIndex = Random.Range(0, tile.tilePossibilities.Count - 1);
-        //Debug.Log("tile possibilities: " + tile.tilePossibilities.Count + " random tile index: " + tileIndex);
-        Vector2 gridPos = tile.gridPosition;
+        if (tile.tilePossibilities.Count == 0)
+        {
+            return false;
+        }
+
+        // Fixed: Use correct Random.Range (upper bound is exclusive)
+        int tileIndex = Random.Range(0, tile.tilePossibilities.Count);
+
         tile.collapsedTile = tile.tilePossibilities[tileIndex];
         tile.collapsed = true;
-        tile.setGridPosition(gridPos);
-        return tile;
+        tile.tilePossibilities.Clear();
+        tile.tilePossibilities.Add(tile.collapsedTile);
+
+        return true;
     }
 
-    Stack<MapTile> backtrackStack(Stack<MapTile> stack)
+    bool PropagateConstraints(MapTile tile)
     {
-        while (stack.Count > 0)
-        {
-            MapTile top = stack.Peek();
-            stack.Pop();
+        // Use a queue for propagation (breadth-first)
+        Queue<MapTile> propagationQueue = new Queue<MapTile>();
+        propagationQueue.Enqueue(tile);
 
-            top.tilePossibilities = connectionData.standardSet;
-            top.Reset();
+        while (propagationQueue.Count > 0)
+        {
+            MapTile current = propagationQueue.Dequeue();
+            List<MapTile> neighbors = GetNeighbors(current);
+
+            foreach (MapTile neighbor in neighbors)
+            {
+                if (neighbor.collapsed) continue;
+
+                // Get valid possibilities for this neighbor based on all its neighbors
+                List<MapTile> validPossibilities = GetValidPossibilities(neighbor);
+
+                if (validPossibilities.Count == 0)
+                {
+                    // Contradiction detected
+                    return false;
+                }
+
+                // If possibilities were reduced, add to queue for further propagation
+                if (validPossibilities.Count < neighbor.tilePossibilities.Count)
+                {
+                    neighbor.tilePossibilities = validPossibilities;
+                    propagationQueue.Enqueue(neighbor);
+                }
+            }
         }
-        return stack;
+
+        return true;
     }
 
-    List<MapTile> getNeighbors(MapTile tile, MapTile[,] grid)
+    List<MapTile> GetValidPossibilities(MapTile tile)
+    {
+        List<MapTile> validTiles = new List<MapTile>(tile.tilePossibilities);
+
+        int x = (int)tile.gridPosition.x;
+        int y = (int)tile.gridPosition.y;
+
+        // Check each direction
+        if (x > 0) // Left neighbor
+        {
+            MapTile leftNeighbor = mapGrid[x - 1, y];
+            if (leftNeighbor.collapsed)
+            {
+                validTiles = FilterByConnection(validTiles, leftNeighbor.collapsedTile.rightConnections, Direction.Left);
+            }
+        }
+
+        if (x < mapSize - 1) // Right neighbor
+        {
+            MapTile rightNeighbor = mapGrid[x + 1, y];
+            if (rightNeighbor.collapsed)
+            {
+                validTiles = FilterByConnection(validTiles, rightNeighbor.collapsedTile.leftConnections, Direction.Right);
+            }
+        }
+
+        if (y > 0) // Down neighbor (assuming Y+ is up)
+        {
+            MapTile downNeighbor = mapGrid[x, y - 1];
+            if (downNeighbor.collapsed)
+            {
+                validTiles = FilterByConnection(validTiles, downNeighbor.collapsedTile.frontConnections, Direction.Down);
+            }
+        }
+
+        if (y < mapSize - 1) // Up neighbor
+        {
+            MapTile upNeighbor = mapGrid[x, y + 1];
+            if (upNeighbor.collapsed)
+            {
+                validTiles = FilterByConnection(validTiles, upNeighbor.collapsedTile.backConnections, Direction.Up);
+            }
+        }
+
+        return validTiles;
+    }
+
+    List<MapTile> FilterByConnection(List<MapTile> possibilities, List<int> allowedConnections, Direction direction)
+    {
+        List<MapTile> filtered = new List<MapTile>();
+
+        foreach (MapTile possibility in possibilities)
+        {
+            List<int> connectionsToCheck = direction switch
+            {
+                Direction.Left => possibility.leftConnections,
+                Direction.Right => possibility.rightConnections,
+                Direction.Up => possibility.frontConnections,
+                Direction.Down => possibility.backConnections,
+                _ => new List<int>()
+            };
+
+            // Check if this tile can connect to the neighbor
+            foreach (int connection in connectionsToCheck)
+            {
+                if (allowedConnections.Contains(connection))
+                {
+                    filtered.Add(possibility);
+                    break;
+                }
+            }
+        }
+
+        return filtered;
+    }
+
+    List<MapTile> GetNeighbors(MapTile tile)
     {
         List<MapTile> neighbors = new List<MapTile>();
-        if (tile.gridPosition.x != 0)
-        {
-            neighbors.Add(grid[(int)(tile.gridPosition.x - 1), (int)tile.gridPosition.y]);
-            Debug.Log("x inner edge");
-        }
-        if (tile.gridPosition.x != grid.GetLength(0) - 1)
-        {
-            neighbors.Add(grid[(int)(tile.gridPosition.x + 1), (int)tile.gridPosition.y]);
-            Debug.Log("x outer edge");
-        }
-        if (tile.gridPosition.y != 0)
-        {
-            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y - 1)]);
-            Debug.Log("y inner edge");
-        }
-        if (tile.gridPosition.y != grid.GetLength(1) - 1)
-        {
-            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y + 1)]);
-            Debug.Log("y outer edge");
-        }
+        int x = (int)tile.gridPosition.x;
+        int y = (int)tile.gridPosition.y;
+
+        if (x > 0)
+            neighbors.Add(mapGrid[x - 1, y]);
+        if (x < mapSize - 1)
+            neighbors.Add(mapGrid[x + 1, y]);
+        if (y > 0)
+            neighbors.Add(mapGrid[x, y - 1]);
+        if (y < mapSize - 1)
+            neighbors.Add(mapGrid[x, y + 1]);
+
         return neighbors;
     }
-    
-    //takes the neighbors of a tile, checks each of their neighbors, combines all lists of connections and reduces down to final possibilities
-    /*void propagateNeighbors(List<MapTile> neighbors, MapTile[,] grid)
-    {
-        foreach(MapTile tile in neighbors) //each neighbor tile
-        {
-            tile.tilePossibilities.Clear(); //clear possibilities to replace
-            List<MapTile> tileNeighbors = getNeighbors(tile, grid);//find each neighbor of new tile
-            Debug.Log("tNeighbors: " + tileNeighbors);
-            int collapseNum = 0;
-            foreach (MapTile collapseCheck in tileNeighbors) //fill possibilities with all of the possible connections
-            {
-                Debug.Log("neighbors neighbor run through");
-                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.y == tile.gridPosition.y - 1) //if newtile is below a collapsed tile
-                {
-                    collapseNum++;
-                    foreach (int socketType in collapseCheck.backConnections)
-                    {
-                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(2, socketType));
-                    }
-                }
-                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.y == tile.gridPosition.y + 1) //if newtile is above a collapsed tile
-                {
-                    collapseNum++;
-                    foreach (int socketType in collapseCheck.backConnections)
-                    {
-                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(1, socketType));
-                    }
-                }
-                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.x == tile.gridPosition.x - 1) //if newtile is to the right of a collapsed tile
-                {
-                    collapseNum++;
-                    foreach (int socketType in collapseCheck.backConnections)
-                    {
-                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(4, socketType));
-                    }
-                }
-                if (collapseCheck.collapsed == true && collapseCheck.gridPosition.x == tile.gridPosition.x + 1) //if newtile is to the left of a collapsed tile
-                {
-                    collapseNum++;
-                    foreach (int socketType in collapseCheck.backConnections)
-                    {
-                        tile.tilePossibilities.AddRange(connectionData.retrieveSet(3, socketType));
-                    }
-                }
-            }
-            //tilepossibilities is filled out with duplicate data - we only want a tile that has been repeated the number of times it has been checked by a collapsed tile
-            List<int> finalList = new();
-            for (int i = 0; i < tile.tilePossibilities.Count; i++)
-            {
-                int possibilityCount = 0;
-                for (int j = 0; j < tile.tilePossibilities.Count; j++)
-                {
-                    if (tile.tilePossibilities[j] == tile.tilePossibilities[i])
-                        possibilityCount++;
-                }
-                Debug.Log("" + possibilityCount + " >= " + collapseNum);
-                if (possibilityCount >= collapseNum)
-                {
-                    finalList.Add(tile.tilePossibilities[i]);
-                }
-            }
-            //finally set the new list of possibilities to the focused neighboring tile
-            foreach (int i in finalList)
-            {
-                Debug.Log("[" + tile.gridPosition.x + " , " + tile.gridPosition.y + "] list element: " + i);
-            }
-            tile.tilePossibilities = finalList;
-        }
-    }*/
 
-    void propagateNeighbors(MapTile tile, MapTile[,] grid, Stack<MapTile> backtrackStack)
+    void InstantiateMap()
     {
-        List<MapTile> neighbors = new List<MapTile>();
-        if (tile.gridPosition.x != 0) //tile to left
+        for (int x = 0; x < mapSize; x++)
         {
-            neighbors.Add(grid[(int)(tile.gridPosition.x - 1), (int)tile.gridPosition.y]);
-            for (int i = 0; i < grid[(int)tile.gridPosition.x - 1, (int)tile.gridPosition.y].tilePossibilities.Count; i++)
+            for (int y = 0; y < mapSize; y++)
             {
-                /*if (tile.leftConnections.Find(grid[(int)tile.gridPosition.x - 1, (int)tile.gridPosition.y].tilePossibilities))
+                MapTile tile = mapGrid[x, y];
+                if (tile.collapsed && tile.collapsedTile != null)
                 {
+                    GameObject prefab = connectionData.mapTilePrefabs.Find(p =>
+                        p.GetComponent<MapTile>() == tile.collapsedTile);
 
-                }*/
+                    if (prefab != null)
+                    {
+                        Instantiate(prefab,
+                            new Vector3(x * tileSize, 0, y * tileSize),
+                            Quaternion.identity);
+                    }
+                }
             }
-        }
-        if (tile.gridPosition.x != grid.GetLength(0) - 1) //tile to right
-        {
-            neighbors.Add(grid[(int)(tile.gridPosition.x + 1), (int)tile.gridPosition.y]);
-        }
-        if (tile.gridPosition.y != 0) //tile to down
-        {
-            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y - 1)]);
-        }
-        if (tile.gridPosition.y != grid.GetLength(1) - 1) //tile to up
-        {
-            neighbors.Add(grid[(int)tile.gridPosition.x, (int)(tile.gridPosition.y + 1)]);
         }
     }
 
+    enum Direction
+    {
+        Left,
+        Right,
+        Up,
+        Down
+    }
 }
