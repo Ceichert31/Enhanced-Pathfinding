@@ -106,6 +106,10 @@ public class AIAgent : MonoBehaviour
         }
 
         Vector3 moveTo = new(path[0].x, path[0].y + CAPSULE_OFFSET, path[0].z);
+        
+        Vector3 direction = target.position - transform.position;
+        transform.forward = new Vector3(direction.x, 0, direction.z);
+
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 
