@@ -120,8 +120,14 @@ MonoBehaviour:
   backConnections: 01000000
   leftConnections: 0100000002000000
   rightConnections: 0100000002000000
+  frontNeighbors: []
+  backNeighbors: []
+  leftNeighbors: []
+  rightNeighbors: []
   tileID: 5
-  tilePossibilities: 
+  tilePossibilities:
+  - {fileID: 8844996388085178936, guid: 04768b19efe4165479c811274a597ec1, type: 3}
+  collapsedTile: {fileID: 0}
   collapsed: 1
 --- !u!1 &2399495347692466994
 GameObject:

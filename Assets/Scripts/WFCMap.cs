@@ -5,11 +5,12 @@ using UnityEngine;
 public class WFCMap : MonoBehaviour
 {
     public int tileSize;
-    public int mapSize; 
+    public int mapSize;
     [SerializeField] ConnectionManager connectionManager;
     [SerializeField] ConnectionData connectionData;
 
     public MapTile[,] mapGrid;
+    private Transform gridParent;
 
     void Start()
     {
@@ -18,24 +19,34 @@ public class WFCMap : MonoBehaviour
 
     void GenerateMap()
     {
+        gridParent = new GameObject("GridCells").transform;
+        gridParent.parent = transform;
+
         mapGrid = new MapTile[mapSize, mapSize];
 
-        //initialize grid with all possibilities
         for (int y = 0; y < mapSize; y++)
         {
             for (int x = 0; x < mapSize; x++)
             {
-                mapGrid[x, y] = connectionData.emptyTile.GetComponent<MapTile>(); // Create new instance for each cell
-                mapGrid[x, y].gridPosition = new Vector2(x, y);
-                mapGrid[x, y].tilePossibilities = new List<MapTile>(connectionData.standardSet);
-                mapGrid[x, y].collapsed = false;
+                GameObject tileObj = new GameObject($"Cell_{x}_{y}");
+                tileObj.transform.parent = gridParent;
+
+                MapTile tile = tileObj.AddComponent<MapTile>();
+                tile.gridPosition = new Vector2(x, y);
+                tile.tilePossibilities = new List<MapTile>(connectionData.standardSet);
+                tile.collapsed = false;
+
+                mapGrid[x, y] = tile;
             }
         }
 
-        // Wave Function Collapse main loop
-        while (true)
+        int iterations = 0;
+        int maxIterations = mapSize * mapSize * 10;
+
+        while (iterations < maxIterations)
         {
-            // Find tile with lowest entropy
+            iterations++;
+
             MapTile currentTile = FindLowestEntropy();
             if (currentTile == null)
             {
@@ -43,23 +54,26 @@ public class WFCMap : MonoBehaviour
                 break;
             }
 
-            // Collapse the tile
             if (!CollapseTile(currentTile))
             {
                 Debug.LogError("Failed to collapse tile - no valid possibilities!");
                 break;
             }
 
-            // Propagate constraints to neighbors
             if (!PropagateConstraints(currentTile))
             {
-                Debug.LogError("Contradiction detected during propagation!");
-                // In a full implementation, you'd backtrack here
+                Debug.LogError($"Contradiction detected at ({currentTile.gridPosition.x}, {currentTile.gridPosition.y})!");
                 break;
             }
         }
 
-        // Instantiate the final map
+        if (iterations >= maxIterations)
+        {
+            Debug.LogError("Timeout: WFC");
+        }
+
+        Destroy(gridParent.gameObject);
+
         InstantiateMap();
     }
 
@@ -67,8 +81,8 @@ public class WFCMap : MonoBehaviour
     {
         MapTile minCell = null;
         int minEntropy = int.MaxValue;
+        List<MapTile> tilesWithMinEntropy = new List<MapTile>();
 
-        // Fixed: Check all cells including edges
         for (int x = 0; x < mapSize; x++)
         {
             for (int y = 0; y < mapSize; y++)
@@ -79,16 +93,25 @@ public class WFCMap : MonoBehaviour
 
                 if (entropy == 0)
                 {
-                    // Contradiction - this shouldn't happen in a working WFC
                     return null;
                 }
 
                 if (entropy < minEntropy)
                 {
                     minEntropy = entropy;
-                    minCell = mapGrid[x, y];
+                    tilesWithMinEntropy.Clear();
+                    tilesWithMinEntropy.Add(mapGrid[x, y]);
+                }
+                else if (entropy == minEntropy)
+                {
+                    tilesWithMinEntropy.Add(mapGrid[x, y]);
                 }
             }
+        }
+
+        if (tilesWithMinEntropy.Count > 0)
+        {
+            return tilesWithMinEntropy[Random.Range(0, tilesWithMinEntropy.Count)];
         }
 
         return minCell;
@@ -101,12 +124,11 @@ public class WFCMap : MonoBehaviour
             return false;
         }
 
-        // Fixed: Use correct Random.Range (upper bound is exclusive)
         int tileIndex = Random.Range(0, tile.tilePossibilities.Count);
 
         tile.collapsedTile = tile.tilePossibilities[tileIndex];
         tile.collapsed = true;
-        tile.tilePossibilities.Clear();
+
         tile.tilePossibilities.Add(tile.collapsedTile);
 
         return true;
@@ -114,33 +136,42 @@ public class WFCMap : MonoBehaviour
 
     bool PropagateConstraints(MapTile tile)
     {
-        // Use a queue for propagation (breadth-first)
         Queue<MapTile> propagationQueue = new Queue<MapTile>();
+        HashSet<MapTile> inQueue = new HashSet<MapTile>();
+
         propagationQueue.Enqueue(tile);
+        inQueue.Add(tile);
 
         while (propagationQueue.Count > 0)
         {
             MapTile current = propagationQueue.Dequeue();
+            inQueue.Remove(current);
+
             List<MapTile> neighbors = GetNeighbors(current);
 
             foreach (MapTile neighbor in neighbors)
             {
                 if (neighbor.collapsed) continue;
 
-                // Get valid possibilities for this neighbor based on all its neighbors
+                int oldCount = neighbor.tilePossibilities.Count;
+
                 List<MapTile> validPossibilities = GetValidPossibilities(neighbor);
 
                 if (validPossibilities.Count == 0)
                 {
-                    // Contradiction detected
+                    //Contradiction detected
                     return false;
                 }
 
-                // If possibilities were reduced, add to queue for further propagation
-                if (validPossibilities.Count < neighbor.tilePossibilities.Count)
+                if (validPossibilities.Count < oldCount)
                 {
                     neighbor.tilePossibilities = validPossibilities;
-                    propagationQueue.Enqueue(neighbor);
+
+                    if (!inQueue.Contains(neighbor))
+                    {
+                        propagationQueue.Enqueue(neighbor);
+                        inQueue.Add(neighbor);
+                    }
                 }
             }
         }
@@ -155,8 +186,7 @@ public class WFCMap : MonoBehaviour
         int x = (int)tile.gridPosition.x;
         int y = (int)tile.gridPosition.y;
 
-        // Check each direction
-        if (x > 0) // Left neighbor
+        if (x > 0)
         {
             MapTile leftNeighbor = mapGrid[x - 1, y];
             if (leftNeighbor.collapsed)
@@ -165,7 +195,7 @@ public class WFCMap : MonoBehaviour
             }
         }
 
-        if (x < mapSize - 1) // Right neighbor
+        if (x < mapSize - 1)
         {
             MapTile rightNeighbor = mapGrid[x + 1, y];
             if (rightNeighbor.collapsed)
@@ -174,7 +204,7 @@ public class WFCMap : MonoBehaviour
             }
         }
 
-        if (y > 0) // Down neighbor (assuming Y+ is up)
+        if (y > 0)
         {
             MapTile downNeighbor = mapGrid[x, y - 1];
             if (downNeighbor.collapsed)
@@ -183,7 +213,7 @@ public class WFCMap : MonoBehaviour
             }
         }
 
-        if (y < mapSize - 1) // Up neighbor
+        if (y < mapSize - 1)
         {
             MapTile upNeighbor = mapGrid[x, y + 1];
             if (upNeighbor.collapsed)
@@ -210,14 +240,19 @@ public class WFCMap : MonoBehaviour
                 _ => new List<int>()
             };
 
-            // Check if this tile can connect to the neighbor
+            bool canConnect = false;
             foreach (int connection in connectionsToCheck)
             {
                 if (allowedConnections.Contains(connection))
                 {
-                    filtered.Add(possibility);
+                    canConnect = true;
                     break;
                 }
+            }
+
+            if (canConnect)
+            {
+                filtered.Add(possibility);
             }
         }
 
@@ -252,13 +287,14 @@ public class WFCMap : MonoBehaviour
                 if (tile.collapsed && tile.collapsedTile != null)
                 {
                     GameObject prefab = connectionData.mapTilePrefabs.Find(p =>
-                        p.GetComponent<MapTile>() == tile.collapsedTile);
+                        p.GetComponent<MapTile>().tileID == tile.collapsedTile.tileID);
 
                     if (prefab != null)
                     {
                         Instantiate(prefab,
                             new Vector3(x * tileSize, 0, y * tileSize),
-                            Quaternion.identity);
+                            Quaternion.identity,
+                            transform);
                     }
                 }
             }

@@ -315,6 +315,11 @@ MonoBehaviour:
   backConnections: 01000000
   leftConnections: 0100000002000000
   rightConnections: 01000000
+  frontNeighbors: []
+  backNeighbors: []
+  leftNeighbors: []
+  rightNeighbors: []
   tileID: 8
-  tilePossibilities: 
+  tilePossibilities: []
+  collapsedTile: {fileID: 0}
   collapsed: 1
