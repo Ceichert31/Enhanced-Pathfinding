@@ -10,6 +10,7 @@ public class WFCMap : MonoBehaviour
     [SerializeField] ConnectionData connectionData;
 
     public MapTile[,] mapGrid;
+    public List<MapTile> toCollapse = new List<MapTile>();
 
     void Start()
     {
@@ -18,6 +19,7 @@ public class WFCMap : MonoBehaviour
 
     void GenerateMap()
     {
+        toCollapse.Clear();
         mapGrid = new MapTile[mapSize, mapSize];
 
         //initialize grid with all possibilities
@@ -25,18 +27,44 @@ public class WFCMap : MonoBehaviour
         {
             for (int x = 0; x < mapSize; x++)
             {
-                mapGrid[x, y] = new MapTile(); // Create new instance for each cell
-                mapGrid[x, y].gridPosition = new Vector2(x, y);
+                mapGrid[x, y] = connectionData.emptyTile.GetComponent<MapTile>(); // Create new instance for each cell
+                mapGrid[x, y].gridPosition = new Vector2Int(x, y);
                 mapGrid[x, y].tilePossibilities = new List<MapTile>(connectionData.standardSet);
                 mapGrid[x, y].collapsed = false;
             }
         }
+        MapTile firstTile = FindLowestEntropy();
+        toCollapse.Add(firstTile);
 
         // Wave Function Collapse main loop
-        while (true)
+        while (toCollapse.Count > 0)
         {
+            //int x = toCollapse[0].x;
+            //int y = toCollapse[0].y;
+            //List<MapTile> allNodes = new List<MapTile>(connectionData.standardSet);
+            List<MapTile> neighbors = GetNeighbors(toCollapse[0]);
+            for (int i = 0; i < neighbors.Count - 1; i++)
+            {
+                if (neighbors[i].collapsed == false)
+                {
+                    if (!toCollapse.Contains(neighbors[i])) toCollapse.Add(neighbors[i]);
+                }
+                else
+                {
+                    Constrain(toCollapse[0], neighbors[i]);
+                }
+            }
+            if (toCollapse[0].tilePossibilities.Count < 1)
+            {
+                mapGrid[toCollapse[0].gridPosition.x, toCollapse[0].gridPosition.y] = connectionData.emptyTile.GetComponent<MapTile>();
+                mapGrid[toCollapse[0].gridPosition.x, toCollapse[0].gridPosition.y].tilePossibilities = new List<MapTile>(connectionData.standardSet);
+            }
+            else
+            {
+                CollapseTile(toCollapse[0]);
+            }
             // Find tile with lowest entropy
-            MapTile currentTile = FindLowestEntropy();
+            /*MapTile currentTile = FindLowestEntropy();
             if (currentTile == null)
             {
                 // All tiles collapsed successfully!
@@ -56,7 +84,7 @@ public class WFCMap : MonoBehaviour
                 Debug.LogError("Contradiction detected during propagation!");
                 // In a full implementation, you'd backtrack here
                 break;
-            }
+            }*/
         }
 
         // Instantiate the final map
@@ -94,6 +122,37 @@ public class WFCMap : MonoBehaviour
         return minCell;
     }
 
+    void ReducePossibilities(List<MapTile> potential, List<MapTile> limitations)
+    {
+        for (int i = 0; i < potential.Count - 1; i++)
+        {
+            if (!limitations.Contains(potential[i]))
+            {
+                potential.Remove(potential[i]);
+            }
+        }
+    }
+    
+    void Constrain(MapTile target, MapTile neighbor)
+    {
+        if (neighbor.gridPosition.x > target.gridPosition.x) // neighbor to the right
+        {
+            ReducePossibilities(target.tilePossibilities, neighbor.leftCompatible);
+        }
+        if (neighbor.gridPosition.x < target.gridPosition.x) // neighbor to the left
+        {
+            ReducePossibilities(target.tilePossibilities, neighbor.rightCompatible);
+        }
+        if (neighbor.gridPosition.y > target.gridPosition.y) // neighbor above
+        {
+            ReducePossibilities(target.tilePossibilities, neighbor.backCompatible);
+        }
+        if(neighbor.gridPosition.y < target.gridPosition.y) // neighbor below
+        {
+            ReducePossibilities(target.tilePossibilities, neighbor.frontCompatible);
+        }
+    }
+
     bool CollapseTile(MapTile tile)
     {
         if (tile.tilePossibilities.Count == 0)
@@ -103,9 +162,10 @@ public class WFCMap : MonoBehaviour
 
         // Fixed: Use correct Random.Range (upper bound is exclusive)
         int tileIndex = Random.Range(0, tile.tilePossibilities.Count);
-
+        var position = tile.gridPosition;
         tile.collapsedTile = tile.tilePossibilities[tileIndex];
         tile.collapsed = true;
+        tile.gridPosition = position;
         tile.tilePossibilities.Clear();
         tile.tilePossibilities.Add(tile.collapsedTile);
 

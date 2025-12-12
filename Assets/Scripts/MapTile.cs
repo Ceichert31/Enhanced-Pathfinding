@@ -5,7 +5,7 @@ using UnityEngine;
 public class MapTile : MonoBehaviour
 {
     //front, back, left, right sockets for sorting
-    public Vector2 gridPosition;
+    public Vector2Int gridPosition;
     public int frontSocket;
     public int backSocket;
     public int leftSocket;
@@ -16,10 +16,10 @@ public class MapTile : MonoBehaviour
     public List<int> leftConnections;
     public List<int> rightConnections;
     //front, back, left, right list of connections
-    public List<MapTile> frontNeighbors;
-    public List<MapTile> backNeighbors;
-    public List<MapTile> leftNeighbors;
-    public List<MapTile> rightNeighbors;
+    public List<MapTile> frontCompatible;
+    public List<MapTile> backCompatible;
+    public List<MapTile> leftCompatible;
+    public List<MapTile> rightCompatible;
     public int tileID; //used for organization within connectionData instead of storing prefabs
     // Start is called before the first frame update
     public List<MapTile> tilePossibilities;
@@ -68,18 +68,18 @@ public class MapTile : MonoBehaviour
         return null;
     }
 
-    public List<MapTile> GetNeighbors(int choice)
+    public List<MapTile> GetCompatibleConnections(int choice)
     {
         switch (choice)
         {
             case 1:
-                return frontNeighbors;
+                return frontCompatible;
             case 2:
-                return backNeighbors;
+                return backCompatible;
             case 3:
-                return leftNeighbors;
+                return leftCompatible;
             case 4:
-                return rightNeighbors;
+                return rightCompatible;
         }
         return null;
     }
@@ -98,7 +98,7 @@ public class MapTile : MonoBehaviour
         rightConnections.Clear();
     }
 
-    public void setGridPosition(Vector2 gridPos)
+    public void setGridPosition(Vector2Int gridPos)
     {
         gridPosition = gridPos;
     }

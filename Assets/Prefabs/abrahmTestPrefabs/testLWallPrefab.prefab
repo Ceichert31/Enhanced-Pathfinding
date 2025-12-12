@@ -120,8 +120,18 @@ MonoBehaviour:
   backConnections: 0100000002000000
   leftConnections: 01000000
   rightConnections: 0100000002000000
+  frontCompatible:
+  - {fileID: 9124561926549614777, guid: ecce7c2c884276540a33e6a7c6572102, type: 3}
+  backCompatible:
+  - {fileID: 6138078584838817504, guid: d1dcbfe8d07fdd14ebbcc1750ff3c694, type: 3}
+  leftCompatible:
+  - {fileID: 5412817579596733038, guid: 06a15fa72f4717b4796be748a18f25b1, type: 3}
+  rightCompatible:
+  - {fileID: 5412817579596733038, guid: 06a15fa72f4717b4796be748a18f25b1, type: 3}
+  - {fileID: 2574516522624430566, guid: 24db4a73ecd4b2c4ca98c183f9e29eed, type: 3}
   tileID: 3
-  tilePossibilities: 
+  tilePossibilities: []
+  collapsedTile: {fileID: 0}
   collapsed: 1
 --- !u!1 &9046823543220778280
 GameObject:
