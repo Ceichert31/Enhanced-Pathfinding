@@ -293,7 +293,7 @@ public class WFCMap : MonoBehaviour
                     {
                         Instantiate(prefab,
                             new Vector3(x * tileSize, 0, y * tileSize),
-                            Quaternion.identity,
+                            prefab.transform.rotation,
                             transform);
                     }
                 }
