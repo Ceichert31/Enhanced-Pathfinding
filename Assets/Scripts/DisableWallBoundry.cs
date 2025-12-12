@@ -8,6 +8,6 @@ public class DisableWallBoundry : MonoBehaviour
 
     private void Awake()
     {
-        wall.SetActive(gameObject.activeSelf);
+        gameObject.SetActive(wall.activeSelf);
     }
 }
