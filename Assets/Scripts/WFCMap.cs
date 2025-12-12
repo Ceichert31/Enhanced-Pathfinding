@@ -22,7 +22,7 @@ public class WFCMap : MonoBehaviour
         {
             for (int x = 0; x < mapSize; x++)
             {   
-                mapGrid[x, y] = new MapTile();
+                mapGrid[x, y] = connectionData.emptyTile.GetComponent<MapTile>();
                 mapGrid[x, y].gridPosition = new Vector2(x, y);
                 mapGrid[x, y].tilePossibilities = new List<int>(connectionData.standardSet);
             }
@@ -63,7 +63,7 @@ public class WFCMap : MonoBehaviour
             for (int y = 0; y < mapSize - 1; y++)
             {
                 int entropy = mapGrid[x, y].tilePossibilities.Count;
-                Debug.Log("" + entropy);
+                //Debug.Log("" + entropy);
                 if (entropy > 1 && entropy < minEntropy)
                 {
                     minEntropy = entropy;
@@ -71,13 +71,14 @@ public class WFCMap : MonoBehaviour
                 }
             }
         }
-        Debug.Log("" + minCell);
+        //Debug.Log("" + minCell);
         return minCell;
     }
 
     MapTile collapseRandomTile(MapTile tile)
     {
         int tileIndex = Random.Range(0, tile.tilePossibilities.Count - 1);
+        Debug.Log("tile possibilities: " + tile.tilePossibilities.Count + " random tile index: " + tileIndex);
         int prefabID = tile.tilePossibilities[tileIndex];
         Vector2 gridPos = tile.gridPosition;
         tile = connectionData.mapTilePrefabs[prefabID].GetComponent<MapTile>();

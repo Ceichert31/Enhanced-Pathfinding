@@ -15,9 +15,15 @@ public class MapTile : MonoBehaviour
     public List<int> backConnections;
     public List<int> leftConnections;
     public List<int> rightConnections;
+    //front, back, left, right list of connections
+    public List<MapTile> frontNeighbors;
+    public List<MapTile> backNeighbors;
+    public List<MapTile> leftNeighbors;
+    public List<MapTile> rightNeighbors;
     public int tileID; //used for organization within connectionData instead of storing prefabs
     // Start is called before the first frame update
-    public List<int> tilePossibilities;
+    public List<MapTile> tilePossibilities;
+    public MapTile collapsedTile;
     public bool collapsed = false;
     void Start()
     {
@@ -46,20 +52,36 @@ public class MapTile : MonoBehaviour
         return 0;
     }
 
-    public int GetConnections(int choice)
+    public List<int> GetConnections(int choice)
     {
         switch (choice)
         {
             case 1:
-                return frontConnections.Count;
+                return frontConnections;
             case 2:
-                return backConnections.Count;
+                return backConnections;
             case 3:
-                return leftConnections.Count;
+                return leftConnections;
             case 4:
-                return rightConnections.Count;
+                return rightConnections;
         }
-        return 0;
+        return null;
+    }
+
+    public List<MapTile> GetNeighbors(int choice)
+    {
+        switch (choice)
+        {
+            case 1:
+                return frontNeighbors;
+            case 2:
+                return backNeighbors;
+            case 3:
+                return leftNeighbors;
+            case 4:
+                return rightNeighbors;
+        }
+        return null;
     }
 
     public void Reset()

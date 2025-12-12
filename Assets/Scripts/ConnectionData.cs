@@ -16,20 +16,20 @@ public class ConnectionData : MonoBehaviour
     public GameObject emptyTile;
 
     //lists of all possible sets of connections
-    public List<int> standardSet;
+    public List<MapTile> standardSet;
     //arrays of tile IDs per socket state - needs new array per new socket state
     //up sets 
-    public List<int> upSet1;
-    public List<int> upSet2;
+    public List<MapTile> upSet1;
+    public List<MapTile> upSet2;
     //down sets
-    public List<int> downSet1;
-    public List<int> downSet2;
+    public List<MapTile> downSet1;
+    public List<MapTile> downSet2;
     //left sets
-    public List<int> leftSet1;
-    public List<int> leftSet2;
+    public List<MapTile> leftSet1;
+    public List<MapTile> leftSet2;
     //right sets
-    public List<int> rightSet1;
-    public List<int> rightSet2;
+    public List<MapTile> rightSet1;
+    public List<MapTile> rightSet2;
 
     // Start is called before the first frame update
     void Awake()
@@ -38,47 +38,47 @@ public class ConnectionData : MonoBehaviour
         {
             MapTile currentPrefab = mapTilePrefabs[i].GetComponent<MapTile>();
             //creating set filled with every ID
-            standardSet.Add(currentPrefab.tileID);
-            standardSet.Sort((tile1, tile2) => tile1.CompareTo(tile2)); //sort in ascending order
+            standardSet.Add(currentPrefab.GetComponent<MapTile>());
+            //standardSet.Sort((tile1, tile2) => tile1.CompareTo(tile2)); //sort in ascending order
 
             //populate up sets
             if (currentPrefab.GetSockets(1) == 1)
             {
-                upSet1.Add(currentPrefab.tileID);
+                upSet1.Add(currentPrefab.GetComponent<MapTile>());
             }
             if (currentPrefab.GetSockets(1) == 2)
             {
-                upSet2.Add(currentPrefab.tileID);
+                upSet2.Add(currentPrefab.GetComponent<MapTile>());
             }
             
             //populate down sets
             if (currentPrefab.GetSockets(2) == 1)
             {
-                downSet1.Add(currentPrefab.tileID);
+                downSet1.Add(currentPrefab.GetComponent<MapTile>());
             }
             if (currentPrefab.GetSockets(2) == 2)
             {
-                downSet2.Add(currentPrefab.tileID);
+                downSet2.Add(currentPrefab.GetComponent<MapTile>());
             }
             
             //populate left sets
             if (currentPrefab.GetSockets(3) == 1)
             {
-                leftSet1.Add(currentPrefab.tileID);
+                leftSet1.Add(currentPrefab.GetComponent<MapTile>());
             }
             if (currentPrefab.GetSockets(3) == 2)
             {
-                leftSet2.Add(currentPrefab.tileID);
+                leftSet2.Add(currentPrefab.GetComponent<MapTile>());
             }
             
             //populate right sets
             if (currentPrefab.GetSockets(4) == 1)
             {
-                rightSet1.Add(currentPrefab.tileID);
+                rightSet1.Add(currentPrefab.GetComponent<MapTile>());
             }
             if(currentPrefab.GetSockets(4) == 2)
             {
-                rightSet2.Add(currentPrefab.tileID);
+                rightSet2.Add(currentPrefab.GetComponent<MapTile>());
             }
         }
     }
@@ -89,7 +89,7 @@ public class ConnectionData : MonoBehaviour
 
     }
     
-    public List<int> retrieveSet(int direction, int socket)
+    public List<MapTile> retrieveSet(int direction, int socket)
     {
         if (direction == 1) // up
         {

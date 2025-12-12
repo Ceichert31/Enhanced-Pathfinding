@@ -42,7 +42,7 @@ public class ConnectionManager : MonoBehaviour
         List<GameObject> chooseFrom = new List<GameObject>();
         if (checkedObject.GetComponent<MapTile>().GetSockets(1) == 0)//checks up
         {
-            if (checkedObject.GetComponent<MapTile>().GetConnections(1) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(1).Count == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
@@ -55,7 +55,7 @@ public class ConnectionManager : MonoBehaviour
         }
         if (checkedObject.GetComponent<MapTile>().GetSockets(2) == 0)//checks right
         {
-            if (checkedObject.GetComponent<MapTile>().GetConnections(2) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(2).Count == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
@@ -68,7 +68,7 @@ public class ConnectionManager : MonoBehaviour
         }
         if (checkedObject.GetComponent<MapTile>().GetSockets(3) == 0)//checks down
         {
-            if (checkedObject.GetComponent<MapTile>().GetConnections(3) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(3).Count == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
@@ -81,7 +81,7 @@ public class ConnectionManager : MonoBehaviour
         }
         if (checkedObject.GetComponent<MapTile>().GetSockets(4) == 0)//checks left
         {
-            if (checkedObject.GetComponent<MapTile>().GetConnections(4) == 0)
+            if (checkedObject.GetComponent<MapTile>().GetConnections(4).Count == 0)
             {
                 for (int i = 0; i < connectionData.mapTilePrefabs.Count; i++)
                 {
