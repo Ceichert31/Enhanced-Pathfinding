@@ -10068,6 +10068,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732563883}
+  rotationSpeed: 5
   agentSpeed: 6
   smoothingEnabled: 1
   smoothingSegments: 3

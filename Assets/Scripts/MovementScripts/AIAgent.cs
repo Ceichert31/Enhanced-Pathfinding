@@ -13,6 +13,9 @@ public class AIAgent : MonoBehaviour
     [SerializeField]
     private Transform target;
 
+    [SerializeField]
+    private float rotationSpeed = 2f;
+
     public float AgentSpeed
     {
         get => agentSpeed; set => agentSpeed = value;
@@ -107,8 +110,9 @@ public class AIAgent : MonoBehaviour
 
         Vector3 moveTo = new(path[0].x, path[0].y + CAPSULE_OFFSET, path[0].z);
         
-        Vector3 direction = target.position - transform.position;
-        transform.forward = new Vector3(direction.x, 0, direction.z);
+        Vector3 direction = moveTo - transform.position;
+        Quaternion lookRot = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, Time.deltaTime * rotationSpeed); 
 
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
