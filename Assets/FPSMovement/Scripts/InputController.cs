@@ -30,6 +30,10 @@ public class InputController : MonoBehaviour
     [Tooltip("The speed the player moves at")]
     [SerializeField]
     private float walkSpeed = 60f;
+    
+    [Tooltip("The speed the player runs at")]
+    [SerializeField]
+    private float sprintSpeed = 75f;
 
     [SerializeField]
     private bool advancedSettings;
@@ -114,6 +118,7 @@ public class InputController : MonoBehaviour
     private bool isMoving;
     private bool applyMovementEffects;
     private bool isUIOpen;
+    private bool isSprinting;
     public bool IsGrounded
     {
         get { return isGrounded; }
@@ -125,6 +130,10 @@ public class InputController : MonoBehaviour
     public bool ApplyMovementEffects
     {
         get { return applyMovementEffects; }
+    }
+    public bool IsSprinting
+    {
+        get { return isSprinting; }
     }
     public Vector2 MoveInput
     {
@@ -193,9 +202,17 @@ public class InputController : MonoBehaviour
 
         //Check if moving
         isMoving = playerMovement.Move.inProgress;
+        Vector3 moveForce;
 
-        //Apply walk speed to the movement vector
-        Vector3 moveForce = MoveDirection() * walkSpeed;
+        if (playerMovement.Dash.inProgress)
+        {
+            //Apply walk speed to the movement vector
+            moveForce = MoveDirection() * sprintSpeed;
+        }
+        else
+        {
+            moveForce = MoveDirection() * walkSpeed;
+        }
 
         //Find the angle between the players up position and the groundHit
         float slopeAngle = Vector3.Angle(Vector3.up, groundHit.normal);
