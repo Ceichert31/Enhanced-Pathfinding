@@ -8,4 +8,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/HorrorGame.unity
     guid: faefdff19849f274caf3fb2451c64c4d
+  - enabled: 1
+    path: Assets/Scenes/WIN.unity
+    guid: 817aa0e136b48e949abdee492f5a3e34
+  - enabled: 1
+    path: Assets/Scenes/LOSE.unity
+    guid: 7e48bf0c7a42fd24dbdc7ded79f1b838
   m_configObjects: {}

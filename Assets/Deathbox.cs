@@ -2,13 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExitDoor : MonoBehaviour
+public class Deathbox : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer != 7) return;
 
-        //Win game
-        gameObject.GetComponent<sceneManager>().SceneWin();
+        gameObject.GetComponent<sceneManager>().SceneLose();
     }
 }

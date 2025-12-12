@@ -27,7 +27,7 @@ public class sceneManager : MonoBehaviour
     }
     public void ScenePlay()
     {
-        SceneManager.LoadScene("PLAY");
+        SceneManager.LoadScene("HorrorGame");
     }
     public void SceneMenu()
     {
