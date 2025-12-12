@@ -204,7 +204,10 @@ public class WFCMap : MonoBehaviour
             neighbors.Add(grid[(int)(tile.gridPosition.x - 1), (int)tile.gridPosition.y]);
             for (int i = 0; i < grid[(int)tile.gridPosition.x - 1, (int)tile.gridPosition.y].tilePossibilities.Count; i++)
             {
-                if(tile.leftConnections.Find(grid[(int)tile.gridPosition.x - 1, (int)tile.gridPosition.y].tilePossibilities))
+                /*if (tile.leftConnections.Find(grid[(int)tile.gridPosition.x - 1, (int)tile.gridPosition.y].tilePossibilities))
+                {
+
+                }*/
             }
         }
         if (tile.gridPosition.x != grid.GetLength(0) - 1) //tile to right
