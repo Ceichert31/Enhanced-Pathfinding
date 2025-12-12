@@ -27,6 +27,9 @@ public class Headbob : MonoBehaviour
     private float _smoothTime;
     private Vector3 _velocity;
 
+    public float sprintHeadbobSpeed = 3f;
+    private float sprintModifier;
+
     private float SpeedFactor
     {
         get
@@ -69,6 +72,15 @@ public class Headbob : MonoBehaviour
     {
         if (ApplyMovementEffects) return;
 
+        if (_inputController.IsSprinting)
+        {
+            sprintModifier = sprintHeadbobSpeed;
+        }
+        else
+        {
+            sprintModifier = 0;
+        }
+
         UpdateHeadBob();
     }
     private void FixedUpdate()
@@ -94,8 +106,8 @@ public class Headbob : MonoBehaviour
         }
         else if (IsMoving)
         {
-            _currentTime.x += headbobSpeed.x / 10 * Time.deltaTime * SpeedFactor;
-            _currentTime.y += headbobSpeed.y / 10 * Time.deltaTime * SpeedFactor;
+            _currentTime.x += headbobSpeed.x / 10 * Time.deltaTime * SpeedFactor * sprintModifier;
+            _currentTime.y += headbobSpeed.y / 10 * Time.deltaTime * SpeedFactor * sprintModifier;
             _currentPos.x = headbobCurveX.Evaluate(_currentTime.x) * headbobIntensity.x;
             _currentPos.y = headbobCurveY.Evaluate(_currentTime.y) * headbobIntensity.y;
 

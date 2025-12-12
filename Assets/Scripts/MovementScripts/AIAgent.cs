@@ -13,6 +13,9 @@ public class AIAgent : MonoBehaviour
     [SerializeField]
     private Transform target;
 
+    [SerializeField]
+    private float rotationSpeed = 2f;
+
     public float AgentSpeed
     {
         get => agentSpeed; set => agentSpeed = value;
@@ -49,12 +52,16 @@ public class AIAgent : MonoBehaviour
 
     private LineRenderer lineRenderer;
 
+    private Animator animator;
+
     private List<Vector3> path = new();
 
     private const float CAPSULE_OFFSET = 1f;
     private const float DEBUG_LINE_OFFSET = 0.5f;
     private void Start()
     {
+        animator = GetComponentInChildren<Animator>();
+
         if (!transform.TryGetComponent(out pathfindingAlgorithm))
         {
             throw new NullReferenceException("Please add a pathfinding algorithm to the AI Agent!");
@@ -78,6 +85,8 @@ public class AIAgent : MonoBehaviour
 
     private void Update()
     {
+        animator.speed = agentSpeed;
+
         //Issue: agent position sometimes moves off navmesh, and must move to nearest navmesh point to proceed again
         path = pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
 
@@ -106,6 +115,11 @@ public class AIAgent : MonoBehaviour
         }
 
         Vector3 moveTo = new(path[0].x, path[0].y + CAPSULE_OFFSET, path[0].z);
+        
+        Vector3 direction = moveTo - transform.position;
+        Quaternion lookRot = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, Time.deltaTime * rotationSpeed); 
+
         transform.position = Vector3.MoveTowards(transform.position, moveTo, agentSpeed * Time.deltaTime);
     }
 

@@ -67,7 +67,10 @@ public class NavmeshGeneration : MonoBehaviour
                 if (Physics.Raycast(new(i, NAVMESH_HEIGHT, j), Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
                 {
                     //Set cost as the height of the point of contact
-                    AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
+                    if (!hitInfo.transform.CompareTag("obstacle"))
+                    {
+                        AddToNavmesh(key, new TerrainData(new(i, hitInfo.point.y, j), hitInfo.point.y, true));
+                    }
 
                     //Keep casting downwards until we hit raycast levels
                     RecursiveCast(hitInfo.point, raycastLevels, key);
@@ -102,13 +105,18 @@ public class NavmeshGeneration : MonoBehaviour
         if (castsLeft < 0)
             return;
 
-        if (Physics.Raycast(castOrigin, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
+        Vector3 offsetOrigin = castOrigin - Vector3.up * 0.05f;
+
+        if (Physics.Raycast(offsetOrigin, Vector3.down, out RaycastHit hitInfo, NAVMESH_HEIGHT, hitLayer))
         {
             if (Mathf.Abs(castOrigin.y - hitInfo.point.y) < maxTraversableHeight)
                 return;
 
             //Set cost as the height of the point of contact
-            AddToNavmesh(key, new TerrainData(new(key.x, hitInfo.point.y, key.y), hitInfo.point.y, true));
+            if (!hitInfo.transform.CompareTag("obstacle"))
+            {
+                AddToNavmesh(key, new TerrainData(new(key.x, hitInfo.point.y, key.y), hitInfo.point.y, true));
+            }
             RecursiveCast(hitInfo.point, --castsLeft, key);
         }
     }
@@ -197,8 +205,8 @@ public class NavmeshGeneration : MonoBehaviour
             if (point == null || neighborPoint == null) return;
 
             //Check if wall blocks the connection
-            if (Physics.Linecast(point.Position + Vector3.up * 0.1f,
-                                neighborPoint.Position + Vector3.up * 0.1f, out RaycastHit info,
+            if (Physics.Linecast(point.Position + Vector3.up * 0.5f,
+                                neighborPoint.Position + Vector3.up * 0.5f, out RaycastHit info,
                                 hitLayer))
             {
                 if (info.transform.gameObject.CompareTag("obstacle"))
