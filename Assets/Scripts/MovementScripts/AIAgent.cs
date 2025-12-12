@@ -52,12 +52,16 @@ public class AIAgent : MonoBehaviour
 
     private LineRenderer lineRenderer;
 
+    private Animator animator;
+
     private List<Vector3> path = new();
 
     private const float CAPSULE_OFFSET = 1f;
     private const float DEBUG_LINE_OFFSET = 0.5f;
     private void Start()
     {
+        animator = GetComponentInChildren<Animator>();
+
         if (!transform.TryGetComponent(out pathfindingAlgorithm))
         {
             throw new NullReferenceException("Please add a pathfinding algorithm to the AI Agent!");
@@ -81,6 +85,8 @@ public class AIAgent : MonoBehaviour
 
     private void Update()
     {
+        animator.speed = agentSpeed;
+
         //Issue: agent position sometimes moves off navmesh, and must move to nearest navmesh point to proceed again
         path = pathfindingAlgorithm.RunPathfinding(RoundVector(transform.position), RoundVector(target.position));
 
