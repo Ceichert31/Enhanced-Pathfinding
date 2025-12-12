@@ -40,7 +40,7 @@ public class WFCMap : MonoBehaviour
             tileStack.Push(currentTile);
 
             //check constraints
-            propagateNeighbors(getNeighbors(currentTile, mapGrid), mapGrid);
+            //propagateNeighbors(getNeighbors(currentTile, mapGrid), mapGrid);
 
             if (tileStack.Count != 0 && tileStack.Peek().tilePossibilities.Count != 0)
             {
